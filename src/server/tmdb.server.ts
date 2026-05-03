@@ -46,14 +46,28 @@ export function backdropUrl(path: string | null, size = "original"): string {
 
 async function tmdbFetch<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
   const url = new URL(`${TMDB_BASE}${endpoint}`);
-  url.searchParams.set("api_key", getApiKey());
   url.searchParams.set("language", "pt-BR");
   url.searchParams.set("region", "BR");
   for (const [k, v] of Object.entries(params)) {
     url.searchParams.set(k, v);
   }
 
-  const res = await fetch(url.toString());
+  const apiKey = getApiKey();
+  const readToken = getReadToken();
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (readToken) {
+    headers["Authorization"] = `Bearer ${readToken}`;
+  } else if (apiKey) {
+    url.searchParams.set("api_key", apiKey);
+  } else {
+    throw new Error("TMDB API: Nenhuma chave configurada. Adicione TMDB_API_KEY ou TMDB_READ_TOKEN.");
+  }
+
+  const res = await fetch(url.toString(), { headers });
   if (!res.ok) {
     throw new Error(`TMDB API error [${res.status}]: ${await res.text()}`);
   }
