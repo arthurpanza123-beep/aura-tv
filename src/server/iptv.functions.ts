@@ -86,10 +86,10 @@ export const fetchSeriesInfoFn = createServerFn({ method: "POST" })
     password: z.string().min(1).max(100),
     seriesId: z.number(),
   }).parse(data))
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<{ info: string }> => {
     const { getSeriesInfo } = await import("./iptv.server");
     const result = await getSeriesInfo(data.username, data.password, data.seriesId);
-    return result as Record<string, unknown>;
+    return { info: JSON.stringify(result) };
   });
 
 export const getStreamUrlFn = createServerFn({ method: "POST" })
