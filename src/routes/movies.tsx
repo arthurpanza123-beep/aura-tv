@@ -50,6 +50,9 @@ function MoviesPage() {
   const [error, setError] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [playerMsg, setPlayerMsg] = useState("");
+  const [showPlayer, setShowPlayer] = useState(false);
+  const [playerStreamUrl, setPlayerStreamUrl] = useState("");
+  const [playerTitle, setPlayerTitle] = useState("");
 
   useEffect(() => {
     if (!creds) return;
