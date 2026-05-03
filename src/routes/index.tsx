@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import logoImg from "@/assets/logo.png";
+import logoImg from "@/assets/logo-central-play.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,9 +22,7 @@ function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(false);
-
-    await new Promise((r) => setTimeout(r, 800));
-
+    await new Promise((r) => setTimeout(r, 600));
     if (username && password) {
       window.location.href = "/profiles";
     } else {
@@ -34,86 +32,59 @@ function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-15 blur-[120px] pointer-events-none" style={{ backgroundColor: "var(--tv-glow)" }} />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-10 blur-[100px] pointer-events-none" style={{ backgroundColor: "var(--tv-glow)" }} />
-
+    <div
+      className="tv-shell items-center justify-center relative"
+      style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 40%, #111e35 70%, #0c1a2e 100%)" }}
+    >
       <form
         onSubmit={handleLogin}
-        className="relative z-10 w-full max-w-lg mx-auto px-8 py-12 flex flex-col items-center gap-8"
+        className="relative z-10 w-full max-w-md mx-auto px-8 flex flex-col items-center gap-6"
       >
-        {/* Logo */}
-        <div className="flex flex-col items-center gap-4">
-          <img
-            src={logoImg}
-            alt="Central Play Plus"
-            className="w-28 h-28 lg:w-36 lg:h-36 object-contain drop-shadow-[0_0_40px_oklch(0.55_0.2_260_/_50%)]"
-          />
-          <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
-            Central Play <span className="text-primary">Plus</span>
-          </h1>
-        </div>
+        <img
+          src={logoImg}
+          alt="Central Play Plus"
+          className="w-24 h-24 object-contain"
+        />
 
-        {/* Fields */}
-        <div className="w-full flex flex-col gap-5">
-          <div className="w-full">
-            <label className="block text-sm font-medium text-muted-foreground mb-2">
-              Usuário
-            </label>
+        <div className="w-full flex flex-col gap-4">
+          <div>
+            <label className="block text-xs font-medium text-[#6b7f99] mb-1.5 uppercase tracking-wider">Usuário</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="tv-input w-full h-16 rounded-xl bg-card border-2 border-border px-5 text-lg text-foreground placeholder:text-muted-foreground focus:border-primary"
+              className="tv-input w-full h-14 rounded-xl bg-[#0f1e35] border border-[#1a2e48] px-5 text-base text-[#e8edf4] placeholder:text-[#4a5a70]"
               placeholder="Digite seu usuário"
               autoComplete="username"
               autoFocus
             />
           </div>
-
-          <div className="w-full">
-            <label className="block text-sm font-medium text-muted-foreground mb-2">
-              Senha
-            </label>
+          <div>
+            <label className="block text-xs font-medium text-[#6b7f99] mb-1.5 uppercase tracking-wider">Senha</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="tv-input w-full h-16 rounded-xl bg-card border-2 border-border px-5 text-lg text-foreground placeholder:text-muted-foreground focus:border-primary"
+              className="tv-input w-full h-14 rounded-xl bg-[#0f1e35] border border-[#1a2e48] px-5 text-base text-[#e8edf4] placeholder:text-[#4a5a70]"
               placeholder="Digite sua senha"
               autoComplete="current-password"
             />
           </div>
         </div>
 
-        {/* Error */}
         {error && (
-          <p className="text-destructive text-base font-semibold animate-in fade-in">
-            Usuário ou senha inválidos
-          </p>
+          <p className="text-[#c0392b] text-sm font-semibold">Usuário ou senha inválidos</p>
         )}
 
-        {/* Button */}
         <button
           type="submit"
           disabled={loading}
-          className="tv-btn w-full h-16 lg:h-18 rounded-xl bg-primary text-primary-foreground text-xl font-bold tracking-wide hover:bg-primary/90 disabled:opacity-60 cursor-pointer transition-all"
+          className="tv-btn w-full h-14 rounded-xl bg-[#1a5a8a] hover:bg-[#1e6a9e] text-white text-lg font-bold disabled:opacity-60 cursor-pointer transition-all"
         >
-          {loading ? (
-            <span className="flex items-center justify-center gap-3">
-              <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Entrando...
-            </span>
-          ) : (
-            "Entrar"
-          )}
+          {loading ? "Entrando..." : "Entrar"}
         </button>
 
-        <p className="text-xs text-muted-foreground/60 text-center mt-2">
+        <p className="text-[10px] text-[#4a5a70] text-center">
           Navegue com as setas do controle remoto
         </p>
       </form>

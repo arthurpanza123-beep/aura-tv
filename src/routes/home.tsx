@@ -25,6 +25,7 @@ function HomePage() {
   const [hero, setHero] = useState<ContentItem | null>(null);
   const [sections, setSections] = useState<ContentSection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeRow, setActiveRow] = useState(0);
 
   useEffect(() => {
     fetchHomeData().then((data) => {
@@ -36,94 +37,74 @@ function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-12 h-12 text-primary animate-spin" />
-          <p className="text-muted-foreground text-base">Carregando catálogo...</p>
-        </div>
+      <div className="tv-shell items-center justify-center" style={{ background: "linear-gradient(160deg, #0a1628, #0d1f3c, #0c1a2e)" }}>
+        <Loader2 className="w-10 h-10 text-[#2a7ab0] animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="tv-shell" style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #111e35 60%, #0c1a2e 100%)" }}>
       <Navbar activeTab="home" />
 
-      {/* Hero Banner — large, TV-optimized */}
+      {/* Hero - compact for 16:9 fit */}
       {hero && (
-        <div className="relative w-full h-[55vh] min-h-[350px] lg:h-[65vh] lg:max-h-[700px] overflow-hidden">
+        <div className="relative w-full flex-shrink-0" style={{ height: "52vh" }}>
           {hero.backdrop && (
             <img src={hero.backdrop} alt={hero.title} className="absolute inset-0 w-full h-full object-cover object-top" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a1628] via-[#0a1628]/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] via-transparent to-[#0a1628]/40" />
 
-          <div className="relative z-10 flex flex-col justify-end h-full px-6 lg:px-12 pb-12 max-w-3xl">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="px-3 py-1 rounded-md bg-primary/20 text-primary text-sm font-bold tracking-wider uppercase border border-primary/30">
+          <div className="relative z-10 flex flex-col justify-end h-full px-10 pb-6 max-w-2xl">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase text-[#2a7ab0] bg-[#2a7ab0]/10 border border-[#2a7ab0]/20">
                 Em Destaque
               </span>
               {hero.rating > 0 && (
-                <span className="flex items-center gap-1 text-yellow-400 text-base font-semibold">
-                  <Star className="w-4 h-4 fill-yellow-400" /> {hero.rating}
+                <span className="flex items-center gap-1 text-yellow-400 text-xs font-semibold">
+                  <Star className="w-3 h-3 fill-yellow-400" /> {hero.rating}
                 </span>
               )}
-              {hero.year && <span className="text-muted-foreground text-sm">{hero.year}</span>}
+              {hero.year && <span className="text-[#6b7f99] text-xs">{hero.year}</span>}
             </div>
-            <h1 className="text-4xl lg:text-6xl font-black text-foreground mb-4 leading-none tracking-tight drop-shadow-lg">
-              {hero.title}
-            </h1>
-            <p className="text-base lg:text-lg text-foreground/70 mb-6 line-clamp-2 max-w-xl">{hero.overview}</p>
+            <h1 className="text-3xl font-bold text-[#e8edf4] mb-2 leading-tight">{hero.title}</h1>
+            <p className="text-sm text-[#8a9bb5] mb-4 line-clamp-2 max-w-lg">{hero.overview}</p>
             <div className="flex items-center gap-3">
-              <a
-                href={`/player/${hero.id}`}
-                className="tv-btn flex items-center gap-3 h-14 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-lg cursor-pointer hover:bg-primary/90 no-underline transition-all"
-                tabIndex={0}
-              >
-                <Play className="w-5 h-5 fill-current" /> Assistir
+              <a href={`/player/${hero.id}`} className="tv-btn flex items-center gap-2 h-11 px-7 rounded-lg bg-[#1a5a8a] hover:bg-[#1e6a9e] text-white font-bold text-sm cursor-pointer no-underline transition-all" tabIndex={0}>
+                <Play className="w-4 h-4 fill-current" /> Assistir
               </a>
-              <a
-                href={`/details/${hero.id}`}
-                className="tv-btn flex items-center gap-2 h-14 px-6 rounded-xl bg-secondary/80 text-secondary-foreground font-semibold text-base cursor-pointer hover:bg-secondary backdrop-blur-sm no-underline transition-all"
-                tabIndex={0}
-              >
-                <Info className="w-5 h-5" /> Mais Info
+              <a href={`/details/${hero.id}`} className="tv-btn flex items-center gap-2 h-11 px-5 rounded-lg bg-[#162a42] hover:bg-[#1a3050] text-[#c8d4e0] font-semibold text-sm cursor-pointer no-underline transition-all" tabIndex={0}>
+                <Info className="w-4 h-4" /> Mais Info
               </a>
-              <button className="tv-btn h-14 w-14 rounded-full border-2 border-muted-foreground/30 text-muted-foreground flex items-center justify-center cursor-pointer hover:border-foreground hover:text-foreground transition-all" tabIndex={0}>
-                <Plus className="w-5 h-5" />
-              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Content Sections */}
-      <div className="relative z-10 -mt-8">
+      {/* Content rows - fill remaining space */}
+      <div className="flex-1 min-h-0 flex flex-col justify-start pt-2">
         <ContinueWatchingRow items={CONTINUE_WATCHING} />
-        {sections.map((section) => (
+        {sections.slice(0, 1).map((section) => (
           <ContentRow key={section.id} title={section.title} items={section.items} />
         ))}
       </div>
-
-      <footer className="px-6 lg:px-12 py-8 text-center border-t border-border/20">
-        <p className="text-xs text-muted-foreground">© 2026 Central Play Plus — Todos os direitos reservados</p>
-      </footer>
     </div>
   );
 }
 
 function ContinueWatchingRow({ items }: { items: (ContentItem & { progress: number })[] }) {
   return (
-    <section className="mb-8 lg:mb-12">
-      <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-4 px-6 lg:px-12 flex items-center gap-3">
-        <Clock className="w-6 h-6 text-primary" /> Continue Assistindo
+    <section className="mb-3">
+      <h2 className="text-base font-bold text-[#e8edf4] mb-2 px-10 flex items-center gap-2">
+        <Clock className="w-4 h-4 text-[#2a7ab0]" /> Continue Assistindo
       </h2>
-      <div className="tv-scroll flex gap-4 overflow-x-auto px-6 lg:px-12 pb-4">
+      <div className="flex gap-3 overflow-x-auto px-10 pb-2">
         {items.map((item) => (
           <a
             key={item.id}
             href={`/player/${item.id}`}
-            className="tv-card group relative flex-shrink-0 overflow-hidden bg-card cursor-pointer w-[300px] lg:w-[380px] rounded-xl no-underline block"
+            className="tv-card group relative flex-shrink-0 overflow-hidden bg-[#0f1e35] cursor-pointer w-[260px] rounded-xl no-underline block"
             style={{ aspectRatio: "16/9" }}
             tabIndex={0}
           >
@@ -132,18 +113,15 @@ function ContinueWatchingRow({ items }: { items: (ContentItem & { progress: numb
             ) : item.poster ? (
               <img src={item.poster} alt={item.title} className="w-full h-full object-cover" />
             ) : null}
-
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-4">
-              <h3 className="text-base font-bold text-foreground truncate">{item.title}</h3>
-              {item.overview && <p className="text-sm text-muted-foreground">{item.overview}</p>}
-              <div className="w-full h-1.5 rounded-full bg-foreground/20 mt-3">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${item.progress}%` }} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent flex flex-col justify-end p-3">
+              <h3 className="text-sm font-bold text-white truncate">{item.title}</h3>
+              <div className="w-full h-1 rounded-full bg-white/20 mt-2">
+                <div className="h-full rounded-full bg-[#2a7ab0]" style={{ width: `${item.progress}%` }} />
               </div>
             </div>
-
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity">
-              <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center shadow-xl">
-                <Play className="w-7 h-7 text-primary-foreground fill-current" />
+              <div className="w-12 h-12 rounded-full bg-[#1a5a8a]/90 flex items-center justify-center">
+                <Play className="w-5 h-5 text-white fill-current" />
               </div>
             </div>
           </a>
