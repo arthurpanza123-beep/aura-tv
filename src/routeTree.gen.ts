@@ -17,6 +17,7 @@ import { Route as KidsRouteImport } from './routes/kids'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlayerIdRouteImport } from './routes/player.$id'
 import { Route as DetailsIdRouteImport } from './routes/details.$id'
 
 const SeriesRoute = SeriesRouteImport.update({
@@ -59,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayerIdRoute = PlayerIdRouteImport.update({
+  id: '/player/$id',
+  path: '/player/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DetailsIdRoute = DetailsIdRouteImport.update({
   id: '/details/$id',
   path: '/details/$id',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/profiles': typeof ProfilesRoute
   '/series': typeof SeriesRoute
   '/details/$id': typeof DetailsIdRoute
+  '/player/$id': typeof PlayerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/profiles': typeof ProfilesRoute
   '/series': typeof SeriesRoute
   '/details/$id': typeof DetailsIdRoute
+  '/player/$id': typeof PlayerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/profiles': typeof ProfilesRoute
   '/series': typeof SeriesRoute
   '/details/$id': typeof DetailsIdRoute
+  '/player/$id': typeof PlayerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/profiles'
     | '/series'
     | '/details/$id'
+    | '/player/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/profiles'
     | '/series'
     | '/details/$id'
+    | '/player/$id'
   id:
     | '__root__'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/profiles'
     | '/series'
     | '/details/$id'
+    | '/player/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +157,7 @@ export interface RootRouteChildren {
   ProfilesRoute: typeof ProfilesRoute
   SeriesRoute: typeof SeriesRoute
   DetailsIdRoute: typeof DetailsIdRoute
+  PlayerIdRoute: typeof PlayerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/player/$id': {
+      id: '/player/$id'
+      path: '/player/$id'
+      fullPath: '/player/$id'
+      preLoaderRoute: typeof PlayerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/details/$id': {
       id: '/details/$id'
       path: '/details/$id'
@@ -225,6 +245,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfilesRoute: ProfilesRoute,
   SeriesRoute: SeriesRoute,
   DetailsIdRoute: DetailsIdRoute,
+  PlayerIdRoute: PlayerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
