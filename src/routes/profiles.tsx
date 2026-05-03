@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 
@@ -21,6 +21,7 @@ const PROFILES = [
 function ProfilesPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background relative overflow-hidden">
+      {/* Decorative glow — pointer-events-none so it never blocks clicks */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-10 blur-[120px] pointer-events-none" style={{ backgroundColor: "var(--tv-glow)" }} />
 
       <div className="flex items-center gap-3 mb-12">
@@ -30,41 +31,43 @@ function ProfilesPage() {
         </span>
       </div>
 
-      <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-10">
+      <h1 className="text-3xl lg:text-5xl font-black text-foreground mb-12">
         Quem está assistindo?
       </h1>
 
-      <div className="flex items-center justify-center gap-6 lg:gap-10 flex-wrap relative z-10">
+      <div className="flex items-center justify-center gap-8 lg:gap-12 flex-wrap relative z-10">
         {PROFILES.map((profile) => (
-          <Link
+          <a
             key={profile.id}
-            to={profile.href as "/home"}
-            className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group no-underline"
+            href={profile.href}
+            className="profile-card flex flex-col items-center gap-4 outline-none cursor-pointer group no-underline"
             tabIndex={0}
           >
             <div
-              className="w-20 h-20 lg:w-28 lg:h-28 rounded-full flex items-center justify-center text-2xl lg:text-3xl font-bold text-white border-4 border-transparent group-hover:border-primary group-focus:border-primary transition-colors"
+              className="w-24 h-24 lg:w-32 lg:h-32 rounded-full flex items-center justify-center text-2xl lg:text-4xl font-bold text-white border-4 border-transparent group-hover:border-primary group-focus:border-primary transition-all"
               style={{ backgroundColor: profile.color }}
             >
               {profile.initials}
             </div>
-            <span className="text-sm lg:text-base text-muted-foreground group-hover:text-foreground group-focus:text-foreground transition-colors">
+            <span className="text-base lg:text-lg text-muted-foreground group-hover:text-foreground group-focus:text-foreground transition-colors font-medium">
               {profile.name}
             </span>
-          </Link>
+          </a>
         ))}
 
-        <div
-          className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group"
+        <a
+          href="#"
+          className="profile-card flex flex-col items-center gap-4 outline-none cursor-pointer group no-underline"
           tabIndex={0}
+          onClick={(e) => e.preventDefault()}
         >
-          <div className="w-20 h-20 lg:w-28 lg:h-28 rounded-full flex items-center justify-center border-4 border-border group-hover:border-primary group-focus:border-primary transition-colors bg-card">
-            <Plus className="w-8 h-8 lg:w-10 lg:h-10 text-muted-foreground group-hover:text-primary transition-colors" />
+          <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full flex items-center justify-center border-4 border-border group-hover:border-primary group-focus:border-primary transition-all bg-card">
+            <Plus className="w-10 h-10 lg:w-12 lg:h-12 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
-          <span className="text-sm lg:text-base text-muted-foreground group-hover:text-foreground transition-colors">
+          <span className="text-base lg:text-lg text-muted-foreground group-hover:text-foreground transition-colors font-medium">
             Adicionar
           </span>
-        </div>
+        </a>
       </div>
     </div>
   );
