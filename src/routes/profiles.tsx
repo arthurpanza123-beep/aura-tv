@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 
@@ -12,21 +12,17 @@ export const Route = createFileRoute("/profiles")({
 });
 
 const PROFILES = [
-  { id: 1, name: "João", color: "oklch(0.6 0.25 255)", initials: "JO" },
-  { id: 2, name: "Maria", color: "oklch(0.65 0.2 150)", initials: "MA" },
-  { id: 3, name: "Pedro", color: "oklch(0.6 0.22 30)", initials: "PE" },
-  { id: 4, name: "Kids", color: "oklch(0.7 0.2 330)", initials: "🧸" },
+  { id: 1, name: "João", color: "oklch(0.6 0.25 255)", initials: "JO", to: "/home" as const },
+  { id: 2, name: "Maria", color: "oklch(0.65 0.2 150)", initials: "MA", to: "/home" as const },
+  { id: 3, name: "Pedro", color: "oklch(0.6 0.22 30)", initials: "PE", to: "/home" as const },
+  { id: 4, name: "Kids", color: "oklch(0.7 0.2 330)", initials: "🧸", to: "/kids" as const },
 ];
 
 function ProfilesPage() {
-  const navigate = useNavigate();
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background relative overflow-hidden">
-      {/* Background glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-10 blur-[120px]" style={{ backgroundColor: "var(--tv-glow)" }} />
 
-      {/* Logo */}
       <div className="flex items-center gap-3 mb-12">
         <img src={logoImg} alt="Central Play Plus" className="w-12 h-12 object-contain" />
         <span className="text-2xl font-bold text-foreground">
@@ -34,17 +30,15 @@ function ProfilesPage() {
         </span>
       </div>
 
-      {/* Title */}
       <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-10">
         Quem está assistindo?
       </h1>
 
-      {/* Profile circles — Disney+ style */}
       <div className="flex items-center justify-center gap-6 lg:gap-10 flex-wrap">
         {PROFILES.map((profile) => (
-          <button
+          <Link
             key={profile.id}
-            onClick={() => navigate({ to: profile.name === "Kids" ? "/kids" : "/home" })}
+            to={profile.to}
             className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group"
             tabIndex={0}
           >
@@ -57,10 +51,9 @@ function ProfilesPage() {
             <span className="text-sm lg:text-base text-muted-foreground group-hover:text-foreground group-focus:text-foreground transition-colors">
               {profile.name}
             </span>
-          </button>
+          </Link>
         ))}
 
-        {/* Add profile */}
         <button
           className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group"
           tabIndex={0}
