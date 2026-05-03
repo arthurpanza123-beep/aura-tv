@@ -244,7 +244,7 @@ function ChannelsPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="tv-shell"
       style={{
         background:
           "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #111e35 60%, #0c1a2e 100%)",
