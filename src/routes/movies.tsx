@@ -5,7 +5,7 @@ import { LoadingScreen } from "@/components/tv/LoadingScreen";
 import { TVPlayer } from "@/components/tv/TVPlayer";
 import { useIptvCredentials } from "@/hooks/useIptvCredentials";
 import { fetchVodCategoriesFn, fetchVodStreamsFn, getStreamUrlFn } from "@/server/iptv.functions";
-import { Search, SlidersHorizontal, Play, Film, AlertTriangle, Tv } from "lucide-react";
+import { Search, SlidersHorizontal, Play, Film, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/movies")({
   head: () => ({
