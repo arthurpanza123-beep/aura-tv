@@ -48,45 +48,50 @@
   --color-tv-glow: var(--tv-glow);
   --color-tv-surface: var(--tv-surface);
   --color-tv-surface-hover: var(--tv-surface-hover);
+  --color-tv-kids-bg: var(--tv-kids-bg);
+  --color-tv-kids-accent: var(--tv-kids-accent);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.08 0.02 260);
+  /* Preto + Azul Elétrico */
+  --background: oklch(0.05 0.005 260);
   --foreground: oklch(0.95 0.01 250);
-  --card: oklch(0.14 0.025 260);
+  --card: oklch(0.1 0.015 260);
   --card-foreground: oklch(0.95 0.01 250);
-  --popover: oklch(0.14 0.025 260);
+  --popover: oklch(0.1 0.015 260);
   --popover-foreground: oklch(0.95 0.01 250);
-  --primary: oklch(0.55 0.2 260);
+  --primary: oklch(0.6 0.25 255);
   --primary-foreground: oklch(0.98 0.005 250);
-  --secondary: oklch(0.18 0.03 260);
+  --secondary: oklch(0.15 0.02 260);
   --secondary-foreground: oklch(0.9 0.01 250);
-  --muted: oklch(0.18 0.03 260);
-  --muted-foreground: oklch(0.6 0.03 255);
-  --accent: oklch(0.55 0.2 260);
+  --muted: oklch(0.15 0.02 260);
+  --muted-foreground: oklch(0.55 0.02 255);
+  --accent: oklch(0.6 0.25 255);
   --accent-foreground: oklch(0.98 0.005 250);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.98 0.005 250);
-  --border: oklch(0.25 0.03 260);
-  --input: oklch(0.2 0.03 260);
-  --ring: oklch(0.55 0.2 260);
-  --chart-1: oklch(0.55 0.2 260);
+  --border: oklch(0.18 0.02 260);
+  --input: oklch(0.15 0.02 260);
+  --ring: oklch(0.6 0.25 255);
+  --chart-1: oklch(0.6 0.25 255);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.1 0.025 260);
+  --sidebar: oklch(0.07 0.015 260);
   --sidebar-foreground: oklch(0.95 0.01 250);
-  --sidebar-primary: oklch(0.55 0.2 260);
+  --sidebar-primary: oklch(0.6 0.25 255);
   --sidebar-primary-foreground: oklch(0.98 0.005 250);
-  --sidebar-accent: oklch(0.2 0.03 260);
+  --sidebar-accent: oklch(0.15 0.02 260);
   --sidebar-accent-foreground: oklch(0.95 0.01 250);
-  --sidebar-border: oklch(0.25 0.03 260);
-  --sidebar-ring: oklch(0.55 0.2 260);
-  --tv-glow: oklch(0.55 0.2 260);
-  --tv-surface: oklch(0.14 0.025 260);
-  --tv-surface-hover: oklch(0.2 0.04 260);
+  --sidebar-border: oklch(0.18 0.02 260);
+  --sidebar-ring: oklch(0.6 0.25 255);
+  --tv-glow: oklch(0.6 0.25 255);
+  --tv-surface: oklch(0.1 0.015 260);
+  --tv-surface-hover: oklch(0.16 0.025 260);
+  --tv-kids-bg: oklch(0.2 0.05 300);
+  --tv-kids-accent: oklch(0.7 0.2 330);
 }
 
 @layer base {
@@ -111,8 +116,8 @@
 .tv-focusable.tv-focused {
   transform: scale(1.05);
   border-color: var(--tv-glow);
-  box-shadow: 0 0 20px 4px oklch(0.55 0.2 260 / 40%),
-              0 0 40px 8px oklch(0.55 0.2 260 / 15%);
+  box-shadow: 0 0 20px 4px oklch(0.6 0.25 255 / 40%),
+              0 0 40px 8px oklch(0.6 0.25 255 / 15%);
   z-index: 10;
 }
 
@@ -128,8 +133,8 @@
 .tv-card.tv-focused {
   transform: scale(1.08);
   border-color: var(--tv-glow);
-  box-shadow: 0 0 24px 6px oklch(0.55 0.2 260 / 50%),
-              0 0 48px 12px oklch(0.55 0.2 260 / 20%);
+  box-shadow: 0 0 24px 6px oklch(0.6 0.25 255 / 50%),
+              0 0 48px 12px oklch(0.6 0.25 255 / 20%);
   z-index: 10;
 }
 
@@ -141,8 +146,8 @@
 .tv-btn:focus,
 .tv-btn.tv-focused {
   transform: scale(1.03);
-  box-shadow: 0 0 20px 4px oklch(0.55 0.2 260 / 50%),
-              0 0 40px 8px oklch(0.55 0.2 260 / 20%);
+  box-shadow: 0 0 20px 4px oklch(0.6 0.25 255 / 50%),
+              0 0 40px 8px oklch(0.6 0.25 255 / 20%);
 }
 
 .tv-input {
@@ -153,7 +158,7 @@
 .tv-input:focus,
 .tv-input.tv-focused {
   border-color: var(--tv-glow);
-  box-shadow: 0 0 12px 2px oklch(0.55 0.2 260 / 30%);
+  box-shadow: 0 0 12px 2px oklch(0.6 0.25 255 / 30%);
 }
 
 .tv-nav-item {
@@ -164,7 +169,25 @@
 .tv-nav-item:focus,
 .tv-nav-item.tv-focused {
   color: var(--color-primary);
-  background-color: oklch(0.55 0.2 260 / 10%);
+  background-color: oklch(0.6 0.25 255 / 10%);
+}
+
+/* Active tab indicator */
+.tv-tab-active {
+  color: var(--color-primary) !important;
+  position: relative;
+}
+.tv-tab-active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--color-primary);
+  box-shadow: 0 0 8px 2px oklch(0.6 0.25 255 / 50%);
 }
 
 /* Hide scrollbars for TV */
@@ -174,4 +197,14 @@
 .tv-scroll {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Profile card glow on hover */
+.profile-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.profile-card:hover,
+.profile-card:focus {
+  transform: scale(1.1);
+  box-shadow: 0 0 30px 8px oklch(0.6 0.25 255 / 40%);
 }
