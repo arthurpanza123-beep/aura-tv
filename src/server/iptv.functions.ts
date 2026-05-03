@@ -19,14 +19,14 @@ export const iptvLoginFn = createServerFn({ method: "POST" })
     try {
       const result = await iptvLogin(data.username, data.password);
 
-      // M3U fallback response
-      if ("m3u" in result) {
+      // Enigma2 fallback response
+      if ("enigma2" in result) {
         if (!result.valid) {
-          return { success: false, error: "Credenciais inválidas" };
+          return { success: false as const, error: "Credenciais inválidas" };
         }
         return {
-          success: true,
-          mode: "m3u" as const,
+          success: true as const,
+          mode: "enigma2" as const,
           user: {
             status: "Active",
             expDate: "",
@@ -40,10 +40,10 @@ export const iptvLoginFn = createServerFn({ method: "POST" })
 
       // Xtream response
       if (!result.user_info || result.user_info.status !== "Active") {
-        return { success: false, error: "Conta inativa ou credenciais inválidas" };
+        return { success: false as const, error: "Conta inativa ou credenciais inválidas" };
       }
       return {
-        success: true,
+        success: true as const,
         mode: "xtream" as const,
         user: {
           status: result.user_info.status,
@@ -56,7 +56,7 @@ export const iptvLoginFn = createServerFn({ method: "POST" })
       };
     } catch (err) {
       console.error("IPTV login error:", err);
-      return { success: false, error: "Erro ao conectar ao servidor" };
+      return { success: false as const, error: "Erro ao conectar ao servidor" };
     }
   });
 
@@ -126,11 +126,4 @@ export const getStreamUrlFn = createServerFn({ method: "POST" })
     const { getStreamUrl } = await import("./iptv.server");
     const url = await getStreamUrl(data.username, data.password, data.streamId, data.type, data.container || "ts");
     return { url };
-  });
-
-export const getM3uStatsFn = createServerFn({ method: "POST" })
-  .inputValidator((data) => credSchema.parse(data))
-  .handler(async ({ data }) => {
-    const { getM3uStats } = await import("./iptv.server");
-    return getM3uStats(data.username, data.password);
   });
