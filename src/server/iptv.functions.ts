@@ -88,7 +88,8 @@ export const fetchSeriesInfoFn = createServerFn({ method: "POST" })
   }).parse(data))
   .handler(async ({ data }) => {
     const { getSeriesInfo } = await import("./iptv.server");
-    return getSeriesInfo(data.username, data.password, data.seriesId);
+    const result = await getSeriesInfo(data.username, data.password, data.seriesId);
+    return result as Record<string, unknown>;
   });
 
 export const getStreamUrlFn = createServerFn({ method: "POST" })
