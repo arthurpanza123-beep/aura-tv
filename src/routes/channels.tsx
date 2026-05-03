@@ -120,12 +120,13 @@ function ChannelsPage() {
   // Handle watch
   const handleWatch = async (channel: IptvChannel) => {
     if (!creds) return;
-    setPlayerMsg("Preview indisponível no navegador. O teste completo será feito no APK.");
-    // Still try to get stream URL for future APK use
+    setPlayerTitle(channel.name);
+    setShowPlayer(true);
     try {
-      await getStreamUrlFn({ data: { ...creds, streamId: channel.stream_id, type: "live" } });
+      const result = await getStreamUrlFn({ data: { ...creds, streamId: channel.stream_id, type: "live" } });
+      setPlayerStreamUrl(result.url);
     } catch {
-      // Expected in browser
+      setPlayerStreamUrl("");
     }
   };
 
