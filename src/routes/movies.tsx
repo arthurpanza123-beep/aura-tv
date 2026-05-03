@@ -108,11 +108,13 @@ function MoviesPage() {
 
   const handleWatch = async (movie: VodItem) => {
     if (!creds) return;
-    setPlayerMsg("Preview indisponível no navegador. O teste completo será feito no APK.");
+    setPlayerTitle(movie.name);
+    setShowPlayer(true);
     try {
-      await getStreamUrlFn({ data: { ...creds, streamId: movie.stream_id, type: "movie", container: movie.container_extension || "mp4" } });
+      const result = await getStreamUrlFn({ data: { ...creds, streamId: movie.stream_id, type: "movie", container: movie.container_extension || "mp4" } });
+      setPlayerStreamUrl(result.url);
     } catch {
-      // Expected
+      setPlayerStreamUrl("");
     }
   };
 
