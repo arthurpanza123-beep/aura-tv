@@ -6,7 +6,6 @@ export const Route = createFileRoute("/")({
 });
 
 function LoginPage() {
-  const navigate = useNavigate();
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("admin123");
   const [error, setError] = useState(false);
@@ -21,7 +20,7 @@ function LoginPage() {
     await new Promise((r) => setTimeout(r, 800));
 
     if (username && password) {
-      await navigate({ to: "/profiles" });
+      window.location.href = "/profiles";
     } else {
       setError(true);
       setLoading(false);
