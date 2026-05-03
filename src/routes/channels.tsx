@@ -165,6 +165,18 @@ function ChannelsPage() {
     );
   }
 
+  // Player overlay
+  if (showPlayer) {
+    return (
+      <TVPlayer
+        streamUrl={playerStreamUrl}
+        title={playerTitle}
+        subtitle="Canal ao Vivo"
+        onBack={() => { setShowPlayer(false); setPlayerStreamUrl(""); }}
+      />
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden" style={{ background: "#000" }}>
       <TVSidebar />
