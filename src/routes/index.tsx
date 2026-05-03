@@ -21,7 +21,7 @@ function LoginPage() {
     await new Promise((r) => setTimeout(r, 800));
 
     if (username && password) {
-      navigate({ to: "/home" });
+      navigate({ to: "/profiles" });
     } else {
       setError(true);
       setLoading(false);
