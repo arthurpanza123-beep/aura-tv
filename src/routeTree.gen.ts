@@ -9,13 +9,39 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SeriesRouteImport } from './routes/series'
 import { Route as ProfilesRouteImport } from './routes/profiles'
+import { Route as MyListRouteImport } from './routes/my-list'
+import { Route as MoviesRouteImport } from './routes/movies'
+import { Route as KidsRouteImport } from './routes/kids'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DetailsIdRouteImport } from './routes/details.$id'
 
+const SeriesRoute = SeriesRouteImport.update({
+  id: '/series',
+  path: '/series',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfilesRoute = ProfilesRouteImport.update({
   id: '/profiles',
   path: '/profiles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyListRoute = MyListRouteImport.update({
+  id: '/my-list',
+  path: '/my-list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoviesRoute = MoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KidsRoute = KidsRouteImport.update({
+  id: '/kids',
+  path: '/kids',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HomeRoute = HomeRouteImport.update({
@@ -23,49 +49,139 @@ const HomeRoute = HomeRouteImport.update({
   path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChannelsRoute = ChannelsRouteImport.update({
+  id: '/channels',
+  path: '/channels',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DetailsIdRoute = DetailsIdRouteImport.update({
+  id: '/details/$id',
+  path: '/details/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/channels': typeof ChannelsRoute
   '/home': typeof HomeRoute
+  '/kids': typeof KidsRoute
+  '/movies': typeof MoviesRoute
+  '/my-list': typeof MyListRoute
   '/profiles': typeof ProfilesRoute
+  '/series': typeof SeriesRoute
+  '/details/$id': typeof DetailsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/channels': typeof ChannelsRoute
   '/home': typeof HomeRoute
+  '/kids': typeof KidsRoute
+  '/movies': typeof MoviesRoute
+  '/my-list': typeof MyListRoute
   '/profiles': typeof ProfilesRoute
+  '/series': typeof SeriesRoute
+  '/details/$id': typeof DetailsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/channels': typeof ChannelsRoute
   '/home': typeof HomeRoute
+  '/kids': typeof KidsRoute
+  '/movies': typeof MoviesRoute
+  '/my-list': typeof MyListRoute
   '/profiles': typeof ProfilesRoute
+  '/series': typeof SeriesRoute
+  '/details/$id': typeof DetailsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/home' | '/profiles'
+  fullPaths:
+    | '/'
+    | '/channels'
+    | '/home'
+    | '/kids'
+    | '/movies'
+    | '/my-list'
+    | '/profiles'
+    | '/series'
+    | '/details/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/home' | '/profiles'
-  id: '__root__' | '/' | '/home' | '/profiles'
+  to:
+    | '/'
+    | '/channels'
+    | '/home'
+    | '/kids'
+    | '/movies'
+    | '/my-list'
+    | '/profiles'
+    | '/series'
+    | '/details/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/channels'
+    | '/home'
+    | '/kids'
+    | '/movies'
+    | '/my-list'
+    | '/profiles'
+    | '/series'
+    | '/details/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChannelsRoute: typeof ChannelsRoute
   HomeRoute: typeof HomeRoute
+  KidsRoute: typeof KidsRoute
+  MoviesRoute: typeof MoviesRoute
+  MyListRoute: typeof MyListRoute
   ProfilesRoute: typeof ProfilesRoute
+  SeriesRoute: typeof SeriesRoute
+  DetailsIdRoute: typeof DetailsIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/series': {
+      id: '/series'
+      path: '/series'
+      fullPath: '/series'
+      preLoaderRoute: typeof SeriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profiles': {
       id: '/profiles'
       path: '/profiles'
       fullPath: '/profiles'
       preLoaderRoute: typeof ProfilesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-list': {
+      id: '/my-list'
+      path: '/my-list'
+      fullPath: '/my-list'
+      preLoaderRoute: typeof MyListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movies': {
+      id: '/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof MoviesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kids': {
+      id: '/kids'
+      path: '/kids'
+      fullPath: '/kids'
+      preLoaderRoute: typeof KidsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/home': {
@@ -75,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/channels': {
+      id: '/channels'
+      path: '/channels'
+      fullPath: '/channels'
+      preLoaderRoute: typeof ChannelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,13 +205,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/details/$id': {
+      id: '/details/$id'
+      path: '/details/$id'
+      fullPath: '/details/$id'
+      preLoaderRoute: typeof DetailsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChannelsRoute: ChannelsRoute,
   HomeRoute: HomeRoute,
+  KidsRoute: KidsRoute,
+  MoviesRoute: MoviesRoute,
+  MyListRoute: MyListRoute,
   ProfilesRoute: ProfilesRoute,
+  SeriesRoute: SeriesRoute,
+  DetailsIdRoute: DetailsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
