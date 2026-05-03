@@ -79,7 +79,7 @@ function ContentRow({ title, items, isWide }: { title: string; items: ContentIte
         {items.map((item) => (
           <button
             key={item.id}
-            className={`tv-card flex-shrink-0 overflow-hidden bg-card cursor-pointer ${
+            className={`tv-card flex-shrink-0 overflow-hidden bg-card cursor-pointer relative ${
               isWide ? "w-52 h-32" : "w-36 h-52"
             }`}
             tabIndex={0}
