@@ -18,7 +18,7 @@ export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) 
   const [muted, setMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  const controlsTimer = useRef<ReturnType<typeof setTimeout>>();
+  const controlsTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const resetControlsTimer = useCallback(() => {
     setShowControls(true);
