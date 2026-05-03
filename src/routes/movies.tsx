@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/tv/Navbar";
 import { ContentRow } from "@/components/tv/ContentRow";
-import { ContentCard } from "@/components/tv/ContentCard";
 import { fetchHomeData, type ContentItem, type ContentSection } from "@/server/tmdb.functions";
 import { Loader2, SlidersHorizontal } from "lucide-react";
 
@@ -61,7 +60,7 @@ function MoviesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
-        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
       </div>
     );
   }
@@ -70,37 +69,34 @@ function MoviesPage() {
     <div className="min-h-screen bg-background">
       <Navbar activeTab="movies" />
       
-      <div className="pt-24 px-6 lg:px-12">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl lg:text-4xl font-black text-foreground">🍿 Filmes</h1>
-        </div>
+      <div className="pt-24 lg:pt-28 px-6 lg:px-12">
+        <h1 className="text-3xl lg:text-5xl font-black text-foreground mb-8">🍿 Filmes</h1>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3 mb-8">
-          {/* Genre pills */}
-          <div className="flex gap-2 tv-scroll overflow-x-auto pb-2">
+        {/* Filters — large for TV */}
+        <div className="flex flex-wrap items-center gap-4 mb-10">
+          <div className="flex gap-3 tv-scroll overflow-x-auto pb-2">
             {GENRE_FILTERS.map(g => (
               <button
                 key={g.id}
                 onClick={() => setActiveGenre(g.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-5 py-3 rounded-full text-base font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   activeGenre === g.id
                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                    : "bg-card text-muted-foreground hover:text-foreground hover:bg-card/80 border border-border"
+                    : "bg-card text-muted-foreground hover:text-foreground border border-border"
                 }`}
+                tabIndex={0}
               >
                 {g.label}
               </button>
             ))}
           </div>
 
-          {/* Sort */}
-          <div className="flex items-center gap-2 ml-auto">
-            <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
+          <div className="flex items-center gap-3 ml-auto">
+            <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
             <select
               value={activeSort}
               onChange={(e) => setActiveSort(e.target.value)}
-              className="bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground cursor-pointer"
+              className="bg-card border border-border rounded-xl px-4 py-3 text-base text-foreground cursor-pointer"
             >
               {SORT_OPTIONS.map(s => (
                 <option key={s.id} value={s.id}>{s.label}</option>
@@ -110,7 +106,6 @@ function MoviesPage() {
         </div>
       </div>
 
-      {/* Content Rows */}
       <div>
         {filteredSections.map((section) => (
           <ContentRow key={section.id} title={section.title} items={sortItems(section.items)} />
