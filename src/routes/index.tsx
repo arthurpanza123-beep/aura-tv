@@ -1,13 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import logoImg from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Login — Central Play Plus" },
+      { name: "description", content: "Acesse sua conta Central Play Plus" },
+    ],
+  }),
   component: LoginPage,
 });
 
 function LoginPage() {
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin123");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +23,6 @@ function LoginPage() {
     setLoading(true);
     setError(false);
 
-    // Simulated login — ready for future API integration
     await new Promise((r) => setTimeout(r, 800));
 
     if (username && password) {
@@ -29,9 +35,9 @@ function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background relative overflow-hidden">
-      {/* Background glow effects */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-15 blur-[120px]" style={{ backgroundColor: "var(--tv-glow)" }} />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-10 blur-[100px]" style={{ backgroundColor: "var(--tv-glow)" }} />
+      {/* Background glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-15 blur-[120px] pointer-events-none" style={{ backgroundColor: "var(--tv-glow)" }} />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-10 blur-[100px] pointer-events-none" style={{ backgroundColor: "var(--tv-glow)" }} />
 
       <form
         onSubmit={handleLogin}
@@ -40,11 +46,11 @@ function LoginPage() {
         {/* Logo */}
         <div className="flex flex-col items-center gap-4">
           <img
-            src={logoUrl}
+            src={logoImg}
             alt="Central Play Plus"
-            className="w-32 h-32 object-contain drop-shadow-[0_0_30px_oklch(0.55_0.2_260_/_40%)]"
+            className="w-28 h-28 lg:w-36 lg:h-36 object-contain drop-shadow-[0_0_40px_oklch(0.55_0.2_260_/_50%)]"
           />
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">
             Central Play <span className="text-primary">Plus</span>
           </h1>
         </div>
@@ -59,9 +65,10 @@ function LoginPage() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="tv-input w-full h-14 rounded-xl bg-card border-2 border-border px-5 text-lg text-foreground placeholder:text-muted-foreground focus:border-primary"
+              className="tv-input w-full h-16 rounded-xl bg-card border-2 border-border px-5 text-lg text-foreground placeholder:text-muted-foreground focus:border-primary"
               placeholder="Digite seu usuário"
               autoComplete="username"
+              autoFocus
             />
           </div>
 
@@ -73,7 +80,7 @@ function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="tv-input w-full h-14 rounded-xl bg-card border-2 border-border px-5 text-lg text-foreground placeholder:text-muted-foreground focus:border-primary"
+              className="tv-input w-full h-16 rounded-xl bg-card border-2 border-border px-5 text-lg text-foreground placeholder:text-muted-foreground focus:border-primary"
               placeholder="Digite sua senha"
               autoComplete="current-password"
             />
@@ -82,7 +89,7 @@ function LoginPage() {
 
         {/* Error */}
         {error && (
-          <p className="text-destructive text-sm font-medium animate-in fade-in">
+          <p className="text-destructive text-base font-semibold animate-in fade-in">
             Usuário ou senha inválidos
           </p>
         )}
@@ -91,7 +98,7 @@ function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="tv-btn w-full h-16 rounded-xl bg-primary text-primary-foreground text-xl font-bold tracking-wide hover:bg-primary/90 disabled:opacity-60 cursor-pointer"
+          className="tv-btn w-full h-16 lg:h-18 rounded-xl bg-primary text-primary-foreground text-xl font-bold tracking-wide hover:bg-primary/90 disabled:opacity-60 cursor-pointer transition-all"
         >
           {loading ? (
             <span className="flex items-center justify-center gap-3">
@@ -106,13 +113,10 @@ function LoginPage() {
           )}
         </button>
 
-        <p className="text-xs text-muted-foreground text-center mt-2">
+        <p className="text-xs text-muted-foreground/60 text-center mt-2">
           Navegue com as setas do controle remoto
         </p>
       </form>
     </div>
   );
 }
-
-import logoImg from "@/assets/logo.png";
-const logoUrl = logoImg;

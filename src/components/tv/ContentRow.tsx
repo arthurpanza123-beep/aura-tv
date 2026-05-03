@@ -33,8 +33,8 @@ export function ContentRow({ title, items, showRank }: ContentRowProps) {
   if (!items.length) return null;
 
   return (
-    <section className="relative mb-6 lg:mb-10 group/row">
-      <h2 className="text-lg lg:text-xl font-bold text-foreground mb-3 px-6 lg:px-12">
+    <section className="relative mb-8 lg:mb-12 group/row">
+      <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-4 px-6 lg:px-12">
         {title}
       </h2>
 
@@ -43,9 +43,9 @@ export function ContentRow({ title, items, showRank }: ContentRowProps) {
         {showLeftArrow && (
           <button
             onClick={() => scroll("left")}
-            className="absolute left-0 top-0 bottom-4 w-12 z-20 bg-gradient-to-r from-background/90 to-transparent flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity cursor-pointer"
+            className="absolute left-0 top-0 bottom-4 w-14 z-20 bg-gradient-to-r from-background/90 to-transparent flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity cursor-pointer"
           >
-            <ChevronLeft className="w-8 h-8 text-foreground" />
+            <ChevronLeft className="w-10 h-10 text-foreground" />
           </button>
         )}
 
@@ -53,7 +53,7 @@ export function ContentRow({ title, items, showRank }: ContentRowProps) {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="tv-scroll flex gap-2 lg:gap-3 overflow-x-auto px-6 lg:px-12 pb-4 scroll-smooth"
+          className="tv-scroll flex gap-3 lg:gap-4 overflow-x-auto px-6 lg:px-12 pb-4 scroll-smooth"
         >
           {items.map((item, i) => (
             <ContentCard
@@ -69,9 +69,9 @@ export function ContentRow({ title, items, showRank }: ContentRowProps) {
         {showRightArrow && (
           <button
             onClick={() => scroll("right")}
-            className="absolute right-0 top-0 bottom-4 w-12 z-20 bg-gradient-to-l from-background/90 to-transparent flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity cursor-pointer"
+            className="absolute right-0 top-0 bottom-4 w-14 z-20 bg-gradient-to-l from-background/90 to-transparent flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity cursor-pointer"
           >
-            <ChevronRight className="w-8 h-8 text-foreground" />
+            <ChevronRight className="w-10 h-10 text-foreground" />
           </button>
         )}
       </div>

@@ -1,24 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Navbar } from "@/components/tv/Navbar";
 import { ContentRow } from "@/components/tv/ContentRow";
 import type { ContentItem } from "@/server/tmdb.functions";
 import {
-  Play, Plus, Star, ArrowLeft, Clock, Calendar, Film, Users,
-  Maximize, Volume2, VolumeX, Settings, Subtitles, PictureInPicture2,
-  SkipBack, SkipForward, Pause, X,
+  Play, Plus, Star, ArrowLeft, Clock, Calendar, Film, Users, X,
 } from "lucide-react";
 
 export const Route = createFileRoute("/details/$id")({
   head: () => ({
-    meta: [
-      { title: "Detalhes — Central Play Plus" },
-    ],
+    meta: [{ title: "Detalhes — Central Play Plus" }],
   }),
   component: DetailsPage,
 });
 
-// Demo detail data
 const DEMO_DETAIL = {
   id: 550,
   title: "Clube da Luta",
@@ -45,105 +39,103 @@ const SIMILAR: ContentItem[] = [
 ];
 
 function DetailsPage() {
+  const { id } = Route.useParams();
   const [showTrailer, setShowTrailer] = useState(false);
-  const [showPlayer, setShowPlayer] = useState(false);
-
-  if (showPlayer) {
-    return <VideoPlayer onClose={() => setShowPlayer(false)} title={DEMO_DETAIL.title} />;
-  }
 
   return (
     <div className="min-h-screen bg-background">
       {/* Backdrop */}
-      <div className="relative w-full h-[50vh] min-h-[350px] overflow-hidden">
+      <div className="relative w-full h-[50vh] lg:h-[60vh] min-h-[350px] overflow-hidden">
         <img src={DEMO_DETAIL.backdrop} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/30" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent" />
 
-        {/* Back button */}
-        <button
-          onClick={() => window.history.back()}
-          className="absolute top-6 left-6 z-20 flex items-center gap-2 px-4 py-2 rounded-lg bg-background/60 backdrop-blur-sm text-foreground hover:bg-background/80 transition-colors cursor-pointer"
+        <a
+          href="#"
+          onClick={(e) => { e.preventDefault(); window.history.back(); }}
+          className="absolute top-6 left-6 z-20 flex items-center gap-2 px-5 py-3 rounded-xl bg-background/60 backdrop-blur-sm text-foreground hover:bg-background/80 transition-colors cursor-pointer no-underline text-base font-semibold"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-6 h-6" />
           Voltar
-        </button>
+        </a>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 -mt-32 px-6 lg:px-12 pb-12">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="relative z-10 -mt-36 px-6 lg:px-12 pb-12">
+        <div className="flex flex-col lg:flex-row gap-10">
           {/* Poster */}
           <div className="hidden lg:block shrink-0">
             <img
               src={DEMO_DETAIL.poster}
               alt={DEMO_DETAIL.title}
-              className="w-64 rounded-xl shadow-2xl shadow-black/50 border border-border"
+              className="w-72 rounded-2xl shadow-2xl shadow-black/50 border-2 border-border"
             />
           </div>
 
           {/* Info */}
           <div className="flex-1">
-            <h1 className="text-4xl lg:text-5xl font-black text-foreground mb-2">{DEMO_DETAIL.title}</h1>
-            <p className="text-sm text-muted-foreground mb-4">{DEMO_DETAIL.originalTitle}</p>
+            <h1 className="text-4xl lg:text-6xl font-black text-foreground mb-2">{DEMO_DETAIL.title}</h1>
+            <p className="text-sm text-muted-foreground mb-5">{DEMO_DETAIL.originalTitle}</p>
 
             {/* Meta */}
-            <div className="flex flex-wrap items-center gap-4 mb-6">
-              <span className="flex items-center gap-1 text-yellow-400 font-bold text-lg">
-                <Star className="w-5 h-5 fill-yellow-400" />
+            <div className="flex flex-wrap items-center gap-5 mb-6">
+              <span className="flex items-center gap-1 text-yellow-400 font-bold text-xl">
+                <Star className="w-6 h-6 fill-yellow-400" />
                 {DEMO_DETAIL.rating}
               </span>
-              <span className="flex items-center gap-1 text-muted-foreground text-sm">
-                <Calendar className="w-4 h-4" /> {DEMO_DETAIL.year}
+              <span className="flex items-center gap-2 text-muted-foreground text-base">
+                <Calendar className="w-5 h-5" /> {DEMO_DETAIL.year}
               </span>
-              <span className="flex items-center gap-1 text-muted-foreground text-sm">
-                <Clock className="w-4 h-4" /> {DEMO_DETAIL.duration}
+              <span className="flex items-center gap-2 text-muted-foreground text-base">
+                <Clock className="w-5 h-5" /> {DEMO_DETAIL.duration}
               </span>
-              <span className="flex items-center gap-1 text-muted-foreground text-sm">
-                <Film className="w-4 h-4" /> {(DEMO_DETAIL.mediaType as string) === "tv" ? "Série" : "Filme"}
+              <span className="flex items-center gap-2 text-muted-foreground text-base">
+                <Film className="w-5 h-5" /> {(DEMO_DETAIL.mediaType as string) === "tv" ? "Série" : "Filme"}
               </span>
             </div>
 
             {/* Genres */}
-            <div className="flex gap-2 mb-6">
+            <div className="flex gap-2 mb-8">
               {DEMO_DETAIL.genres.map(g => (
-                <span key={g} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20">
+                <span key={g} className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20">
                   {g}
                 </span>
               ))}
             </div>
 
             {/* Buttons */}
-            <div className="flex items-center gap-3 mb-8">
-              <button
-                onClick={() => setShowPlayer(true)}
-                className="tv-btn flex items-center gap-2 h-14 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-base cursor-pointer hover:bg-primary/90"
+            <div className="flex items-center gap-4 mb-8">
+              <a
+                href={`/player/${id}`}
+                className="tv-btn flex items-center gap-3 h-16 px-10 rounded-xl bg-primary text-primary-foreground font-bold text-lg cursor-pointer hover:bg-primary/90 no-underline transition-all"
+                tabIndex={0}
               >
-                <Play className="w-5 h-5 fill-current" />
+                <Play className="w-6 h-6 fill-current" />
                 Assistir
-              </button>
+              </a>
               <button
                 onClick={() => setShowTrailer(true)}
-                className="tv-btn flex items-center gap-2 h-14 px-6 rounded-xl bg-secondary text-secondary-foreground font-semibold cursor-pointer hover:bg-secondary/80"
+                className="tv-btn flex items-center gap-2 h-16 px-8 rounded-xl bg-secondary text-secondary-foreground font-semibold text-base cursor-pointer hover:bg-secondary/80 transition-all"
+                tabIndex={0}
               >
                 <Play className="w-5 h-5" />
                 Trailer
               </button>
-              <button className="tv-btn flex items-center justify-center h-14 w-14 rounded-xl border-2 border-border text-muted-foreground cursor-pointer hover:border-primary hover:text-primary transition-colors">
-                <Plus className="w-5 h-5" />
+              <button className="tv-btn flex items-center justify-center h-16 w-16 rounded-xl border-2 border-border text-muted-foreground cursor-pointer hover:border-primary hover:text-primary transition-all" tabIndex={0}>
+                <Plus className="w-6 h-6" />
               </button>
             </div>
 
             {/* Overview */}
-            <p className="text-foreground/80 text-base leading-relaxed mb-6 max-w-2xl">
+            <p className="text-foreground/80 text-lg leading-relaxed mb-8 max-w-2xl">
               {DEMO_DETAIL.overview}
             </p>
 
             {/* Director & Cast */}
-            <div className="space-y-2 text-sm">
-              <p><span className="text-muted-foreground">Diretor:</span> <span className="text-foreground font-medium">{DEMO_DETAIL.director}</span></p>
-              <p className="flex items-start gap-1">
-                <Users className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div className="space-y-3 text-base">
+              <p><span className="text-muted-foreground">Diretor:</span> <span className="text-foreground font-semibold">{DEMO_DETAIL.director}</span></p>
+              <p className="flex items-start gap-2">
+                <Users className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                 <span><span className="text-muted-foreground">Elenco:</span> <span className="text-foreground">{DEMO_DETAIL.cast.join(", ")}</span></span>
               </p>
             </div>
@@ -153,16 +145,16 @@ function DetailsPage() {
         {/* Trailer modal */}
         {showTrailer && (
           <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-6">
-            <div className="relative w-full max-w-4xl aspect-video">
+            <div className="relative w-full max-w-5xl aspect-video">
               <button
                 onClick={() => setShowTrailer(false)}
-                className="absolute -top-12 right-0 text-foreground hover:text-primary cursor-pointer"
+                className="absolute -top-14 right-0 text-foreground hover:text-primary cursor-pointer transition-colors"
               >
-                <X className="w-8 h-8" />
+                <X className="w-10 h-10" />
               </button>
               <iframe
                 src={DEMO_DETAIL.trailerUrl}
-                className="w-full h-full rounded-xl"
+                className="w-full h-full rounded-2xl"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
@@ -171,141 +163,8 @@ function DetailsPage() {
         )}
 
         {/* Similar */}
-        <div className="mt-12">
+        <div className="mt-14">
           <ContentRow title="🎬 Recomendações Similares" items={SIMILAR} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Video Player ─── */
-interface VideoPlayerProps {
-  onClose: () => void;
-  title: string;
-}
-
-function VideoPlayer({ onClose, title }: VideoPlayerProps) {
-  const [playing, setPlaying] = useState(true);
-  const [muted, setMuted] = useState(false);
-  const [progress, setProgress] = useState(35);
-  const [showControls, setShowControls] = useState(true);
-  const [quality, setQuality] = useState("1080p");
-  const [showQuality, setShowQuality] = useState(false);
-  const [showSubtitles, setShowSubtitles] = useState(false);
-
-  return (
-    <div
-      className="fixed inset-0 z-[100] bg-black flex items-center justify-center"
-      onMouseMove={() => setShowControls(true)}
-    >
-      {/* Fake video background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
-        <span className="text-muted-foreground/20 text-2xl">🎬 {title}</span>
-      </div>
-
-      {/* Controls overlay */}
-      <div className={`absolute inset-0 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}>
-        {/* Top bar */}
-        <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between">
-          <button onClick={onClose} className="flex items-center gap-2 text-foreground hover:text-primary cursor-pointer">
-            <ArrowLeft className="w-6 h-6" />
-            <span className="font-semibold">{title}</span>
-          </button>
-        </div>
-
-        {/* Center play/pause */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="flex items-center gap-8">
-            <button className="text-foreground/70 hover:text-foreground cursor-pointer">
-              <SkipBack className="w-10 h-10" />
-            </button>
-            <button
-              onClick={() => setPlaying(!playing)}
-              className="w-20 h-20 rounded-full bg-foreground/20 backdrop-blur-sm flex items-center justify-center hover:bg-foreground/30 cursor-pointer"
-            >
-              {playing ? <Pause className="w-10 h-10 text-foreground" /> : <Play className="w-10 h-10 text-foreground fill-current" />}
-            </button>
-            <button className="text-foreground/70 hover:text-foreground cursor-pointer">
-              <SkipForward className="w-10 h-10" />
-            </button>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-          {/* Progress bar */}
-          <div className="w-full mb-4 group cursor-pointer" onClick={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            setProgress(((e.clientX - rect.left) / rect.width) * 100);
-          }}>
-            <div className="w-full h-1 group-hover:h-2 rounded-full bg-foreground/20 transition-all">
-              <div className="h-full rounded-full bg-primary relative" style={{ width: `${progress}%` }}>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-foreground/70">0:48:23 / 2:19:00</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* Volume */}
-              <button onClick={() => setMuted(!muted)} className="text-foreground/70 hover:text-foreground cursor-pointer">
-                {muted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-              </button>
-
-              {/* Subtitles */}
-              <div className="relative">
-                <button onClick={() => setShowSubtitles(!showSubtitles)} className="text-foreground/70 hover:text-foreground cursor-pointer">
-                  <Subtitles className="w-6 h-6" />
-                </button>
-                {showSubtitles && (
-                  <div className="absolute bottom-10 right-0 bg-card rounded-lg p-3 min-w-[160px] shadow-xl border border-border">
-                    <p className="text-xs text-muted-foreground mb-2 font-semibold">Legendas</p>
-                    {["Desligado", "Português", "English", "Español"].map(s => (
-                      <button key={s} className="block w-full text-left text-sm py-1 px-2 rounded hover:bg-secondary text-foreground cursor-pointer">{s}</button>
-                    ))}
-                    <p className="text-xs text-muted-foreground mb-2 mt-3 font-semibold">Áudio</p>
-                    {["Português (BR)", "English", "Español"].map(a => (
-                      <button key={a} className="block w-full text-left text-sm py-1 px-2 rounded hover:bg-secondary text-foreground cursor-pointer">{a}</button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Quality */}
-              <div className="relative">
-                <button onClick={() => setShowQuality(!showQuality)} className="text-foreground/70 hover:text-foreground cursor-pointer flex items-center gap-1">
-                  <Settings className="w-5 h-5" />
-                  <span className="text-xs">{quality}</span>
-                </button>
-                {showQuality && (
-                  <div className="absolute bottom-10 right-0 bg-card rounded-lg p-2 min-w-[120px] shadow-xl border border-border">
-                    {["Auto", "4K", "1080p", "720p", "480p"].map(q => (
-                      <button
-                        key={q}
-                        onClick={() => { setQuality(q); setShowQuality(false); }}
-                        className={`block w-full text-left text-sm py-1.5 px-3 rounded cursor-pointer ${quality === q ? "text-primary bg-primary/10" : "text-foreground hover:bg-secondary"}`}
-                      >{q}</button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* PiP */}
-              <button className="text-foreground/70 hover:text-foreground cursor-pointer">
-                <PictureInPicture2 className="w-6 h-6" />
-              </button>
-
-              {/* Fullscreen */}
-              <button className="text-foreground/70 hover:text-foreground cursor-pointer">
-                <Maximize className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
