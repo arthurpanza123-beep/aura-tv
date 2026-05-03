@@ -273,8 +273,7 @@ function ChannelsPage() {
         ))}
       </div>
 
-      {/* Main content - split layout */}
-      <div className="flex-1 flex px-6 lg:px-10 gap-6 pb-16 min-h-0">
+      <div className="flex-1 flex px-10 gap-6 pb-12 min-h-0">
         {/* LEFT - Channel List */}
         <div className="w-[45%] flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto pr-2 space-y-1 tv-scroll">
