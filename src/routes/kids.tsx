@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { Navbar } from "@/components/tv/Navbar";
+import { useState, useEffect, useCallback } from "react";
+import { TVSidebar } from "@/components/tv/TVSidebar";
 import { ContentRow } from "@/components/tv/ContentRow";
+import { LoadingScreen } from "@/components/tv/LoadingScreen";
 import { fetchHomeData, type ContentSection } from "@/server/tmdb.functions";
-import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/kids")({
   head: () => ({
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/kids")({
 function KidsPage() {
   const [sections, setSections] = useState<ContentSection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
     fetchHomeData().then((data) => {
@@ -31,30 +32,26 @@ function KidsPage() {
     }).catch(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="tv-shell items-center justify-center" style={{ background: "linear-gradient(160deg, #0a1628, #0d1f3c, #0c1a2e)" }}>
-        <Loader2 className="w-10 h-10 text-[#2a7ab0] animate-spin" />
-      </div>
-    );
+  const handleLoadingFinished = useCallback(() => setShowContent(true), []);
+
+  if (loading || !showContent) {
+    return <LoadingScreen onFinished={handleLoadingFinished} duration={loading ? 1500 : 600} />;
   }
 
   return (
-    <div className="tv-shell" style={{ background: "linear-gradient(160deg, #0f1530 0%, #151a3a 30%, #12182e 60%, #0c1a2e 100%)" }}>
-      <Navbar activeTab="kids" />
-
-      <div className="pt-16 px-10">
-        <h1 className="text-2xl font-bold text-[#e8edf4]">
-          🧸 Kids
-        </h1>
-        <p className="text-[#6b7f99] text-sm mt-1">Conteúdo seguro e divertido para toda a família</p>
-      </div>
-
-      <div className="flex-1 min-h-0 flex flex-col justify-start pt-3">
-        {sections.slice(0, 3).map((section) => (
-          <ContentRow key={section.id} title={section.title} items={section.items} />
-        ))}
-      </div>
+    <div className="flex h-screen w-screen overflow-hidden" style={{ background: "linear-gradient(160deg, #0f1530 0%, #151a3a 30%, #0c1a2e 100%)" }}>
+      <TVSidebar />
+      <main className="flex-1 ml-16 overflow-y-auto overflow-x-hidden">
+        <div className="px-8 pt-6">
+          <h1 className="text-2xl font-bold text-[#e8edf4]">🧸 Kids</h1>
+          <p className="text-[#6b7f99] text-sm mt-1">Conteúdo seguro e divertido para toda a família</p>
+        </div>
+        <div className="py-4 space-y-2">
+          {sections.map((section) => (
+            <ContentRow key={section.id} title={section.title} items={section.items} />
+          ))}
+        </div>
+      </main>
     </div>
   );
 }

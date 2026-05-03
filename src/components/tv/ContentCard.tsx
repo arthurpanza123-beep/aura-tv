@@ -15,7 +15,7 @@ export function ContentCard({ item, index, showRank }: ContentCardProps) {
   return (
     <a
       href={`/details/${item.id}`}
-      className="tv-card group relative flex-shrink-0 overflow-hidden bg-[#0f1e35] cursor-pointer w-[140px] no-underline block"
+      className="tv-card group relative flex-shrink-0 overflow-hidden bg-[#0f1e35] cursor-pointer w-full min-w-[120px] max-w-[180px] no-underline block"
       style={{ aspectRatio: "2/3" }}
       tabIndex={0}
     >

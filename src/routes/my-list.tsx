@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Navbar } from "@/components/tv/Navbar";
+import { TVSidebar } from "@/components/tv/TVSidebar";
+import { ContentGrid } from "@/components/tv/ContentGrid";
 import { Bookmark } from "lucide-react";
-import { ContentCard } from "@/components/tv/ContentCard";
 import type { ContentItem } from "@/server/tmdb.functions";
 
 export const Route = createFileRoute("/my-list")({
@@ -24,22 +24,18 @@ const SAVED_ITEMS: ContentItem[] = [
 
 function MyListPage() {
   return (
-    <div className="tv-shell" style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #111e35 60%, #0c1a2e 100%)" }}>
-      <Navbar activeTab="my-list" />
-
-      <div className="pt-16 px-10 flex items-center gap-3 mb-4">
-        <Bookmark className="w-5 h-5 text-[#2a7ab0]" />
-        <h1 className="text-2xl font-bold text-[#e8edf4]">Minha Lista</h1>
-        <span className="text-sm text-[#6b7f99]">({SAVED_ITEMS.length} itens)</span>
-      </div>
-
-      <div className="flex-1 min-h-0 px-10 overflow-x-auto">
-        <div className="flex gap-3 pb-4">
-          {SAVED_ITEMS.map((item, i) => (
-            <ContentCard key={item.id} item={item} index={i} />
-          ))}
+    <div className="flex h-screen w-screen overflow-hidden" style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #0c1a2e 100%)" }}>
+      <TVSidebar />
+      <main className="flex-1 ml-16 overflow-y-auto overflow-x-hidden">
+        <div className="px-8 pt-6 flex items-center gap-3 mb-4">
+          <Bookmark className="w-5 h-5 text-[#2a9af0]" />
+          <h1 className="text-2xl font-bold text-[#e8edf4]">Minha Lista</h1>
+          <span className="text-sm text-[#6b7f99]">({SAVED_ITEMS.length} itens)</span>
         </div>
-      </div>
+        <div className="px-4 pb-8">
+          <ContentGrid items={SAVED_ITEMS} />
+        </div>
+      </main>
     </div>
   );
 }
