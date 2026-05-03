@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import logoImg from "@/assets/logo-central-play.png";
-import { iptvLoginFn } from "@/server/iptv.functions";
+import { iptvLoginFn } from "@/functions/iptv.functions";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -32,13 +32,12 @@ function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      const result = await loginFn({ data: { username: username.trim(), password: password.trim() } });
+      const result = await loginFn({
+        data: { username: username.trim(), password: password.trim() },
+      });
       if (result.success) {
-        sessionStorage.setItem("iptv_user", username.trim());
-        sessionStorage.setItem("iptv_pass", password.trim());
-        if (result.user) {
-          sessionStorage.setItem("iptv_exp", result.user.expDate || "");
-        }
+        sessionStorage.clear();
+        sessionStorage.setItem("app_session_token", result.appSessionToken);
         navigate({ to: "/home" });
       } else {
         // User-friendly error messages
@@ -59,11 +58,15 @@ function LoginPage() {
   return (
     <div
       className="tv-shell items-center justify-center relative overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 40%, #111e35 70%, #0c1a2e 100%)" }}
+      style={{
+        background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 40%, #111e35 70%, #0c1a2e 100%)",
+      }}
     >
       {/* Ambient glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04]"
-        style={{ background: "radial-gradient(circle, #2a9af0 0%, transparent 70%)" }} />
+      <div
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04]"
+        style={{ background: "radial-gradient(circle, #2a9af0 0%, transparent 70%)" }}
+      />
 
       <form
         onSubmit={handleLogin}

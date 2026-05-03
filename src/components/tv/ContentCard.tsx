@@ -1,5 +1,5 @@
 import { Star } from "lucide-react";
-import type { ContentItem } from "@/server/tmdb.functions";
+import type { ContentItem } from "@/functions/tmdb.functions";
 import { useState } from "react";
 
 interface ContentCardProps {
@@ -25,9 +25,7 @@ export function ContentCard({ item, index, showRank }: ContentCardProps) {
         </div>
       )}
 
-      {!imgLoaded && !imgError && (
-        <div className="absolute inset-0 bg-[#0f1e35] animate-pulse" />
-      )}
+      {!imgLoaded && !imgError && <div className="absolute inset-0 bg-[#0f1e35] animate-pulse" />}
 
       {item.poster && !imgError ? (
         <img

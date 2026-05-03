@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { TVPlayer } from "@/components/tv/TVPlayer";
 import { useState, useEffect } from "react";
 import { useIptvCredentials } from "@/hooks/useIptvCredentials";
-import { getStreamUrlFn } from "@/server/iptv.functions";
+import { getPlaybackUrlFn } from "@/functions/iptv.functions";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/player/$id")({
@@ -17,14 +18,15 @@ function PlayerPage() {
   const creds = useIptvCredentials();
   const [streamUrl, setStreamUrl] = useState("");
   const [loading, setLoading] = useState(true);
+  const getPlaybackUrl = useServerFn(getPlaybackUrlFn);
 
   useEffect(() => {
     if (!creds) return;
-    getStreamUrlFn({ data: { ...creds, streamId: Number(id), type: "movie", container: "mp4" } })
-      .then(r => setStreamUrl(r.url))
+    getPlaybackUrl({ data: { ...creds, contentId: id, type: "movie" } })
+      .then((r) => setStreamUrl(r.url))
       .catch(() => setStreamUrl(""))
       .finally(() => setLoading(false));
-  }, [creds, id]);
+  }, [creds, id, getPlaybackUrl]);
 
   if (loading) {
     return (

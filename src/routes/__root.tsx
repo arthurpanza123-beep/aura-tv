@@ -8,9 +8,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          A página que você procura não existe.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">A página que você procura não existe.</p>
         <div className="mt-6">
           <a
             href="/"
@@ -30,7 +28,11 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Central Play Plus — Streaming & IPTV" },
-      { name: "description", content: "Central Play Plus — sua central de entretenimento com canais ao vivo, filmes e séries." },
+      {
+        name: "description",
+        content:
+          "Central Play Plus — sua central de entretenimento com canais ao vivo, filmes e séries.",
+      },
       { property: "og:title", content: "Central Play Plus" },
       { property: "og:description", content: "Streaming & IPTV premium" },
       { property: "og:type", content: "website" },
@@ -39,7 +41,10 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,

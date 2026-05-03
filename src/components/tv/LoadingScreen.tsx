@@ -32,7 +32,10 @@ export function LoadingScreen({ onFinished, duration = 1500 }: LoadingScreenProp
       <div className="relative mb-8">
         <div
           className="absolute inset-0 rounded-full blur-3xl opacity-30"
-          style={{ background: "radial-gradient(circle, #2a7ab0 0%, transparent 70%)", transform: "scale(2.5)" }}
+          style={{
+            background: "radial-gradient(circle, #2a7ab0 0%, transparent 70%)",
+            transform: "scale(2.5)",
+          }}
         />
         <img
           src={logoImg}

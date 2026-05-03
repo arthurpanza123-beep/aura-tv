@@ -73,7 +73,10 @@ export function Navbar({ onSearch, activeTab = "home" }: NavbarProps) {
               />
               <button
                 type="button"
-                onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                onClick={() => {
+                  setSearchOpen(false);
+                  setSearchQuery("");
+                }}
                 className="ml-2 p-1.5 text-[#6b7f99] hover:text-[#e8edf4] cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -107,9 +110,7 @@ export function Navbar({ onSearch, activeTab = "home" }: NavbarProps) {
             key={tab.id}
             href={tab.href}
             className={`whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold transition-colors no-underline ${
-              activeTab === tab.id
-                ? "bg-[#1a5a8a] text-white"
-                : "text-[#6b7f99] bg-[#0f1e35]/50"
+              activeTab === tab.id ? "bg-[#1a5a8a] text-white" : "text-[#6b7f99] bg-[#0f1e35]/50"
             }`}
           >
             {tab.label}

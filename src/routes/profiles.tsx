@@ -20,7 +20,9 @@ function ProfilesPage() {
   return (
     <div
       className="tv-shell items-center justify-center relative"
-      style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 40%, #111e35 70%, #0c1a2e 100%)" }}
+      style={{
+        background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 40%, #111e35 70%, #0c1a2e 100%)",
+      }}
     >
       <div className="flex items-center gap-3 mb-10">
         <img src={logoImg} alt="Central Play Plus" className="w-12 h-12 object-contain" />
@@ -29,9 +31,7 @@ function ProfilesPage() {
         </span>
       </div>
 
-      <h1 className="text-3xl font-bold text-[#e8edf4] mb-10">
-        Quem está assistindo?
-      </h1>
+      <h1 className="text-3xl font-bold text-[#e8edf4] mb-10">Quem está assistindo?</h1>
 
       <div className="flex items-center justify-center gap-10 relative z-10">
         {PROFILES.map((profile) => (

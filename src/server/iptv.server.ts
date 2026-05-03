@@ -1,5 +1,11 @@
-// IPTV server-only helpers — Xtream API + Enigma2 XML fallback
-// DNS is read from the IPTV_BASE_URL secret at runtime
+// IPTV server-only helpers. Keep DNS, credentials and stream URLs on this side.
+
+type ContentType = "live" | "movie" | "series";
+
+const USER_AGENT = "CentralPlayPlus/1.0";
+const SESSION_TTL = 6 * 60 * 60 * 1000;
+const CATALOG_TTL = 5 * 60 * 1000;
+const MODE_TTL = 30 * 60 * 1000;
 
 function getBaseUrl(): string {
   const url = process.env.IPTV_BASE_URL;
@@ -7,29 +13,25 @@ function getBaseUrl(): string {
   return url.replace(/\/+$/, "");
 }
 
-// ─── Shared interfaces ───
-
-export interface IptvUserInfo {
-  username: string;
-  password: string;
-  status: string;
-  exp_date: string;
-  is_trial: string;
-  active_cons: string;
-  created_at: string;
-  max_connections: string;
+function hash(input: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(36);
 }
 
-export interface IptvAuthResult {
-  user_info: IptvUserInfo;
-  server_info: {
-    url: string;
-    port: string;
-    https_port: string;
-    server_protocol: string;
-    rtmp_port: string;
-    timezone: string;
-  };
+function providerKey(): string {
+  return hash(getBaseUrl());
+}
+
+function makeContentId(type: ContentType, name: string, categoryId: string, ref: string): string {
+  return `${type}_${hash(`${providerKey()}:${type}:${name}:${categoryId}:${ref}`)}`;
+}
+
+function now() {
+  return Date.now();
 }
 
 export interface IptvCategory {
@@ -38,42 +40,37 @@ export interface IptvCategory {
   parent_id: number;
 }
 
-export interface IptvChannel {
+export interface SafeChannel {
+  id: string;
   num: number;
   name: string;
-  stream_type: string;
-  stream_id: number;
+  stream_id: string;
+  stream_type: "live";
   stream_icon: string;
   epg_channel_id: string | null;
-  added: string;
   category_id: string;
-  custom_sid: string;
   tv_archive: number;
-  direct_source: string;
-  tv_archive_duration: number;
-  stream_url?: string;
 }
 
-export interface IptvVodItem {
+export interface SafeVodItem {
+  id: string;
   num: number;
   name: string;
-  stream_type: string;
-  stream_id: number;
+  stream_id: string;
+  stream_type: "movie";
   stream_icon: string;
   rating: string;
   rating_5based: number;
   added: string;
   category_id: string;
   container_extension: string;
-  custom_sid: string;
-  direct_source: string;
-  stream_url?: string;
 }
 
-export interface IptvSeriesItem {
+export interface SafeSeriesItem {
+  id: string;
   num: number;
   name: string;
-  series_id: number;
+  series_id: string;
   cover: string;
   plot: string;
   cast: string;
@@ -87,50 +84,71 @@ export interface IptvSeriesItem {
   youtube_trailer: string;
   episode_run_time: string;
   category_id: string;
-  stream_url?: string;
 }
 
-// ─── Xtream API helpers ───
-
-async function iptvFetch<T>(params: Record<string, string>): Promise<T> {
-  const base = getBaseUrl();
-  const url = new URL(`${base}/player_api.php`);
-  for (const [k, v] of Object.entries(params)) {
-    url.searchParams.set(k, v);
-  }
-  const res = await fetch(url.toString(), {
-    headers: { "User-Agent": "CentralPlayPlus/1.0" },
-  });
-  if (!res.ok) throw new Error(`IPTV API error [${res.status}]`);
-  return res.json() as Promise<T>;
+export interface SafeEpisode {
+  id: string;
+  episode_num: number;
+  title: string;
+  container_extension: string;
+  info?: {
+    duration?: string;
+    plot?: string;
+    movie_image?: string;
+  };
 }
 
-async function xtreamAvailable(username: string, password: string): Promise<boolean> {
-  try {
-    const base = getBaseUrl();
-    const url = `${base}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
-    const res = await fetch(url, { headers: { "User-Agent": "CentralPlayPlus/1.0" } });
-    if (!res.ok) return false;
-    const text = await res.text();
-    try {
-      const json = JSON.parse(text);
-      return !!json.user_info;
-    } catch {
-      return false;
-    }
-  } catch {
-    return false;
-  }
+interface IptvAuthResult {
+  user_info?: {
+    status?: string;
+    exp_date?: string;
+    is_trial?: string;
+    active_cons?: string;
+    created_at?: string;
+    max_connections?: string;
+  };
 }
 
-// ─── Enigma2 XML API helpers ───
+interface RawChannel {
+  num?: number;
+  name?: string;
+  stream_type?: string;
+  stream_id?: number | string;
+  stream_icon?: string;
+  epg_channel_id?: string | null;
+  category_id?: string;
+  tv_archive?: number;
+}
 
-function b64Decode(str: string): string {
-  try {
-    return atob(str);
-  } catch {
-    return str;
-  }
+interface RawVodItem {
+  num?: number;
+  name?: string;
+  stream_id?: number | string;
+  stream_icon?: string;
+  rating?: string;
+  rating_5based?: number;
+  added?: string;
+  category_id?: string;
+  container_extension?: string;
+}
+
+interface RawSeriesItem {
+  num?: number;
+  name?: string;
+  series_id?: number | string;
+  cover?: string;
+  plot?: string;
+  cast?: string;
+  director?: string;
+  genre?: string;
+  releaseDate?: string;
+  last_modified?: string;
+  rating?: string;
+  rating_5based?: number;
+  backdrop_path?: string[];
+  youtube_trailer?: string;
+  episode_run_time?: string;
+  category_id?: string;
 }
 
 interface E2Channel {
@@ -141,37 +159,113 @@ interface E2Channel {
   descImage: string;
 }
 
-async function enigma2Fetch(username: string, password: string, type: string, catId?: string): Promise<string> {
-  const base = getBaseUrl();
-  let url = `${base}/enigma2?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&type=${type}`;
-  if (catId) url += `&cat_id=${catId}`;
-  const res = await fetch(url, { headers: { "User-Agent": "CentralPlayPlus/1.0" } });
-  if (!res.ok) throw new Error(`Enigma2 API error [${res.status}]`);
-  return res.text();
+interface AppSession {
+  token: string;
+  username: string;
+  password: string;
+  mode: "xtream" | "enigma2";
+  providerKey: string;
+  createdAt: number;
+  touchedAt: number;
 }
 
-function parseE2Xml(xml: string): E2Channel[] {
-  const channels: E2Channel[] = [];
-  // Parse <channel> blocks using regex (lightweight, no XML parser needed in Worker)
-  const channelRegex = /<channel>([\s\S]*?)<\/channel>/g;
-  let match: RegExpExecArray | null;
-  while ((match = channelRegex.exec(xml)) !== null) {
-    const block = match[1];
-    const title = extractTag(block, "title");
-    const description = extractTag(block, "description");
-    const categoryId = extractTag(block, "category_id");
-    const streamUrl = extractCdata(block, "stream_url") || extractCdata(block, "playlist_url");
-    const descImage = extractCdata(block, "desc_image");
+interface PlaybackRef {
+  type: ContentType;
+  mode: "xtream" | "enigma2";
+  streamId?: string;
+  categoryId?: string;
+  container?: string;
+  url?: string;
+}
 
-    channels.push({
-      title: title ? b64Decode(title) : "",
-      description: description ? b64Decode(description) : "",
-      categoryId: categoryId || "0",
-      streamUrl: streamUrl || "",
-      descImage: descImage || "",
-    });
+const sessions = new Map<string, AppSession>();
+const modeCache = new Map<string, { mode: "xtream" | "enigma2"; ts: number }>();
+const catalogCache = new Map<string, { data: unknown; ts: number }>();
+const playbackRefs = new Map<string, PlaybackRef>();
+
+function cacheKey(session: AppSession, type: string, categoryId = "all") {
+  return `${session.providerKey}:${hash(session.username)}:${session.mode}:${type}:${categoryId}`;
+}
+
+function getCached<T>(key: string): T | null {
+  const cached = catalogCache.get(key);
+  if (!cached || now() - cached.ts > CATALOG_TTL) return null;
+  return cached.data as T;
+}
+
+function setCached(key: string, data: unknown) {
+  catalogCache.set(key, { data, ts: now() });
+}
+
+function touchSession(session: AppSession) {
+  session.touchedAt = now();
+}
+
+function getSession(appSessionToken: string): AppSession {
+  const session = sessions.get(appSessionToken);
+  if (!session || now() - session.touchedAt > SESSION_TTL) {
+    if (session) sessions.delete(appSessionToken);
+    throw new Error("Sessao expirada");
   }
-  return channels;
+  touchSession(session);
+  return session;
+}
+
+async function iptvFetch<T>(session: AppSession, params: Record<string, string>): Promise<T> {
+  const url = new URL(`${getBaseUrl()}/player_api.php`);
+  url.searchParams.set("username", session.username);
+  url.searchParams.set("password", session.password);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  const res = await fetch(url.toString(), { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) throw new Error(`IPTV API error [${res.status}]`);
+  return res.json() as Promise<T>;
+}
+
+async function xtreamAvailable(username: string, password: string): Promise<boolean> {
+  try {
+    const url = new URL(`${getBaseUrl()}/player_api.php`);
+    url.searchParams.set("username", username);
+    url.searchParams.set("password", password);
+    const res = await fetch(url.toString(), { headers: { "User-Agent": USER_AGENT } });
+    if (!res.ok) return false;
+    const text = await res.text();
+    try {
+      return !!JSON.parse(text).user_info;
+    } catch {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+}
+
+async function detectMode(username: string, password: string): Promise<"xtream" | "enigma2"> {
+  const key = `${providerKey()}:${hash(username)}`;
+  const cached = modeCache.get(key);
+  if (cached && now() - cached.ts < MODE_TTL) return cached.mode;
+  const mode = (await xtreamAvailable(username, password)) ? "xtream" : "enigma2";
+  modeCache.set(key, { mode, ts: now() });
+  console.log(`[IPTV] Mode: ${mode}`);
+  return mode;
+}
+
+function b64Decode(str: string): string {
+  try {
+    return atob(str);
+  } catch {
+    return str;
+  }
+}
+
+async function enigma2Fetch(session: AppSession, type: string, catId?: string): Promise<string> {
+  const url = new URL(`${getBaseUrl()}/enigma2`);
+  url.searchParams.set("username", session.username);
+  url.searchParams.set("password", session.password);
+  url.searchParams.set("type", type);
+  if (catId) url.searchParams.set("cat_id", catId);
+  const res = await fetch(url.toString(), { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) throw new Error(`Enigma2 API error [${res.status}]`);
+  return res.text();
 }
 
 function extractTag(block: string, tag: string): string {
@@ -184,127 +278,172 @@ function extractCdata(block: string, tag: string): string {
   return m ? m[1] : "";
 }
 
+function parseE2Xml(xml: string): E2Channel[] {
+  const channels: E2Channel[] = [];
+  const channelRegex = /<channel>([\s\S]*?)<\/channel>/g;
+  let match: RegExpExecArray | null;
+  while ((match = channelRegex.exec(xml)) !== null) {
+    const block = match[1];
+    const title = extractTag(block, "title");
+    const description = extractTag(block, "description");
+    channels.push({
+      title: title ? b64Decode(title) : "",
+      description: description ? b64Decode(description) : "",
+      categoryId: extractTag(block, "category_id") || "0",
+      streamUrl: extractCdata(block, "stream_url") || extractCdata(block, "playlist_url"),
+      descImage: extractCdata(block, "desc_image"),
+    });
+  }
+  return channels;
+}
+
 function parseE2Description(desc: string): Record<string, string> {
   const result: Record<string, string> = {};
-  const lines = desc.split("\n");
-  for (const line of lines) {
+  for (const line of desc.split("\n")) {
     const idx = line.indexOf(":");
-    if (idx > 0) {
-      const key = line.slice(0, idx).trim();
-      const val = line.slice(idx + 1).trim();
-      if (key && val) result[key] = val;
-    }
+    if (idx > 0) result[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
   }
   return result;
 }
 
-// ─── Enigma2 category parser ───
-
 function parseE2Categories(xml: string): IptvCategory[] {
-  const channels = parseE2Xml(xml);
-  // First channel is usually "All" — skip it or include it
-  return channels
-    .filter(ch => ch.title.toLowerCase() !== "all")
-    .map(ch => ({
-      category_id: ch.categoryId,
-      category_name: ch.title,
-      parent_id: 0,
-    }));
+  return parseE2Xml(xml)
+    .filter((ch) => ch.title.toLowerCase() !== "all")
+    .map((ch) => ({ category_id: ch.categoryId, category_name: ch.title, parent_id: 0 }));
 }
 
-// ─── Enigma2-based data cache ───
-
-interface E2CachedData {
-  liveCategories: IptvCategory[];
-  vodCategories: IptvCategory[];
-  seriesCategories: IptvCategory[];
-  liveStreams: Map<string, IptvChannel[]>; // catId -> channels
-  vodStreams: Map<string, IptvVodItem[]>;
-  seriesStreams: Map<string, IptvSeriesItem[]>;
-  allLive: IptvChannel[];
-  allVod: IptvVodItem[];
-  allSeries: IptvSeriesItem[];
+function remember(contentId: string, ref: PlaybackRef) {
+  playbackRefs.set(contentId, ref);
 }
 
-const e2Cache = new Map<string, { data: E2CachedData; ts: number }>();
-const CACHE_TTL = 5 * 60 * 1000;
-
-async function loadE2Categories(username: string, password: string): Promise<{
-  liveCategories: IptvCategory[];
-  vodCategories: IptvCategory[];
-  seriesCategories: IptvCategory[];
-}> {
-  const [liveXml, vodXml, seriesXml] = await Promise.all([
-    enigma2Fetch(username, password, "get_live_categories"),
-    enigma2Fetch(username, password, "get_vod_categories"),
-    enigma2Fetch(username, password, "get_series_categories"),
-  ]);
+function sanitizeXtreamChannel(item: RawChannel, i: number): SafeChannel {
+  const streamId = String(item.stream_id ?? i + 1);
+  const categoryId = String(item.category_id ?? "0");
+  const name = item.name || "Sem nome";
+  const id = makeContentId("live", name, categoryId, streamId);
+  remember(id, { type: "live", mode: "xtream", streamId, container: "ts" });
   return {
-    liveCategories: parseE2Categories(liveXml),
-    vodCategories: parseE2Categories(vodXml),
-    seriesCategories: parseE2Categories(seriesXml),
+    id,
+    num: item.num ?? i + 1,
+    name,
+    stream_id: id,
+    stream_type: "live",
+    stream_icon: item.stream_icon || "",
+    epg_channel_id: item.epg_channel_id ?? null,
+    category_id: categoryId,
+    tv_archive: item.tv_archive ?? 0,
   };
 }
 
-async function loadE2LiveStreams(username: string, password: string, categoryId: string): Promise<IptvChannel[]> {
-  const xml = await enigma2Fetch(username, password, "get_live_streams", categoryId);
-  const channels = parseE2Xml(xml);
-  return channels.map((ch, i) => ({
+function sanitizeXtreamVod(item: RawVodItem, i: number): SafeVodItem {
+  const streamId = String(item.stream_id ?? i + 1);
+  const categoryId = String(item.category_id ?? "0");
+  const name = item.name || "Sem titulo";
+  const container = item.container_extension || "mp4";
+  const id = makeContentId("movie", name, categoryId, `${streamId}.${container}`);
+  remember(id, { type: "movie", mode: "xtream", streamId, container });
+  return {
+    id,
+    num: item.num ?? i + 1,
+    name,
+    stream_id: id,
+    stream_type: "movie",
+    stream_icon: item.stream_icon || "",
+    rating: item.rating || "0",
+    rating_5based: item.rating_5based ?? 0,
+    added: item.added || "",
+    category_id: categoryId,
+    container_extension: container,
+  };
+}
+
+function sanitizeXtreamSeries(item: RawSeriesItem, i: number): SafeSeriesItem {
+  const seriesId = String(item.series_id ?? i + 1);
+  const categoryId = String(item.category_id ?? "0");
+  const name = item.name || "Sem titulo";
+  const id = makeContentId("series", name, categoryId, seriesId);
+  remember(id, { type: "series", mode: "xtream", streamId: seriesId, container: "mp4" });
+  return {
+    id,
+    num: item.num ?? i + 1,
+    name,
+    series_id: id,
+    cover: item.cover || "",
+    plot: item.plot || "",
+    cast: item.cast || "",
+    director: item.director || "",
+    genre: item.genre || "",
+    releaseDate: item.releaseDate || "",
+    last_modified: item.last_modified || "",
+    rating: item.rating || "",
+    rating_5based: item.rating_5based ?? 0,
+    backdrop_path: item.backdrop_path || [],
+    youtube_trailer: item.youtube_trailer || "",
+    episode_run_time: item.episode_run_time || "",
+    category_id: categoryId,
+  };
+}
+
+function sanitizeE2Channel(ch: E2Channel, i: number, categoryId: string): SafeChannel {
+  const id = makeContentId(
+    "live",
+    ch.title,
+    categoryId,
+    ch.streamUrl || `${categoryId}:${ch.title}`,
+  );
+  remember(id, { type: "live", mode: "enigma2", categoryId, url: ch.streamUrl });
+  return {
+    id,
     num: i + 1,
     name: ch.title,
+    stream_id: id,
     stream_type: "live",
-    stream_id: i + 1,
     stream_icon: ch.descImage,
     epg_channel_id: null,
-    added: "",
     category_id: categoryId,
-    custom_sid: "",
     tv_archive: 0,
-    direct_source: "",
-    tv_archive_duration: 0,
-    stream_url: ch.streamUrl,
-  }));
+  };
 }
 
-async function loadE2VodStreams(username: string, password: string, categoryId: string): Promise<IptvVodItem[]> {
-  const xml = await enigma2Fetch(username, password, "get_vod_streams", categoryId);
-  const channels = parseE2Xml(xml);
-  return channels.map((ch, i) => {
-    const meta = parseE2Description(ch.description);
-    const ratingStr = meta["RATING"] || "0";
-    const rating = parseFloat(ratingStr) || 0;
-    return {
-      num: i + 1,
-      name: ch.title,
-      stream_type: "movie",
-      stream_id: i + 1,
-      stream_icon: ch.descImage || meta["COVER_BIG"] || "",
-      rating: ratingStr,
-      rating_5based: rating > 5 ? rating / 2 : rating,
-      added: meta["RELEASEDATE"] || meta["RELEASE_DATE"] || "",
-      category_id: categoryId,
-      container_extension: "mp4",
-      custom_sid: "",
-      direct_source: "",
-      stream_url: ch.streamUrl,
-    };
-  });
-}
-
-async function loadE2SeriesStreams(username: string, password: string, categoryId: string): Promise<IptvSeriesItem[]> {
-  const xml = await enigma2Fetch(username, password, "get_series_categories");
-  // For series, we return category info as series items since enigma2 doesn't have series_id
-  const channels = parseE2Xml(xml);
-  const filtered = channels.filter(ch => ch.categoryId === categoryId || !categoryId);
-  return filtered.map((ch, i) => ({
+function sanitizeE2Vod(ch: E2Channel, i: number, categoryId: string): SafeVodItem {
+  const meta = parseE2Description(ch.description);
+  const ratingStr = meta.RATING || "0";
+  const rating = parseFloat(ratingStr) || 0;
+  const id = makeContentId(
+    "movie",
+    ch.title,
+    categoryId,
+    ch.streamUrl || `${categoryId}:${ch.title}`,
+  );
+  remember(id, { type: "movie", mode: "enigma2", categoryId, url: ch.streamUrl, container: "mp4" });
+  return {
+    id,
     num: i + 1,
     name: ch.title,
-    series_id: parseInt(ch.categoryId) || i + 1,
-    cover: ch.descImage || "",
+    stream_id: id,
+    stream_type: "movie",
+    stream_icon: ch.descImage || meta.COVER_BIG || "",
+    rating: ratingStr,
+    rating_5based: rating > 5 ? rating / 2 : rating,
+    added: meta.RELEASEDATE || meta.RELEASE_DATE || "",
+    category_id: categoryId,
+    container_extension: "mp4",
+  };
+}
+
+function sanitizeE2SeriesCategory(cat: IptvCategory, i: number): SafeSeriesItem {
+  const id = makeContentId("series", cat.category_name, cat.category_id, cat.category_id);
+  remember(id, { type: "series", mode: "enigma2", categoryId: cat.category_id });
+  return {
+    id,
+    num: i + 1,
+    name: cat.category_name,
+    series_id: id,
+    cover: "",
     plot: "",
     cast: "",
     director: "",
-    genre: "",
+    genre: cat.category_name,
     releaseDate: "",
     last_modified: "",
     rating: "",
@@ -312,213 +451,246 @@ async function loadE2SeriesStreams(username: string, password: string, categoryI
     backdrop_path: [],
     youtube_trailer: "",
     episode_run_time: "",
-    category_id: categoryId || ch.categoryId,
-    stream_url: ch.streamUrl,
-  }));
+    category_id: cat.category_id,
+  };
 }
 
-// ─── Mode detection ───
+export async function createAppSession(username: string, password: string) {
+  const mode = await detectMode(username, password);
+  const tempSession: AppSession = {
+    token: "validation",
+    username,
+    password,
+    mode,
+    providerKey: providerKey(),
+    createdAt: now(),
+    touchedAt: now(),
+  };
 
-let _useE2: boolean | null = null;
-
-async function shouldUseE2(username: string, password: string): Promise<boolean> {
-  if (_useE2 !== null) return _useE2;
-  const ok = await xtreamAvailable(username, password);
-  _useE2 = !ok;
-  console.log(`[IPTV] Mode: ${_useE2 ? "Enigma2" : "Xtream"}`);
-  return _useE2;
-}
-
-// ─── Public API (with Xtream → Enigma2 fallback) ───
-
-export async function iptvLogin(username: string, password: string): Promise<IptvAuthResult | { enigma2: true; valid: boolean }> {
-  const useE2 = await shouldUseE2(username, password);
-  if (!useE2) {
-    return iptvFetch<IptvAuthResult>({ username, password });
+  if (mode === "enigma2") {
+    const xml = await enigma2Fetch(tempSession, "get_live_categories");
+    if (!xml.includes("<channel>")) throw new Error("Credenciais invalidas");
+  } else {
+    const result = await iptvFetch<IptvAuthResult>(tempSession, {});
+    if (!result.user_info || result.user_info.status !== "Active") throw new Error("Conta inativa");
   }
-  // Enigma2 fallback — validate by fetching categories
-  try {
-    const xml = await enigma2Fetch(username, password, "get_live_categories");
-    const valid = xml.includes("<channel>");
-    return { enigma2: true, valid };
-  } catch (err) {
-    console.error("[IPTV] Enigma2 login validation failed:", err);
-    return { enigma2: true, valid: false };
-  }
+
+  const token = `sess_${crypto.randomUUID()}`;
+  const session = { ...tempSession, token };
+  sessions.set(token, session);
+
+  return {
+    appSessionToken: token,
+    mode,
+    user: { status: "Active" },
+  };
 }
 
-export async function getLiveCategories(username: string, password: string): Promise<IptvCategory[]> {
-  if (await shouldUseE2(username, password)) {
-    const xml = await enigma2Fetch(username, password, "get_live_categories");
-    return parseE2Categories(xml);
-  }
-  return iptvFetch<IptvCategory[]>({ username, password, action: "get_live_categories" });
+export async function getLiveCategories(appSessionToken: string): Promise<IptvCategory[]> {
+  const session = getSession(appSessionToken);
+  const key = cacheKey(session, "liveCategories");
+  const cached = getCached<IptvCategory[]>(key);
+  if (cached) return cached;
+  const data =
+    session.mode === "enigma2"
+      ? parseE2Categories(await enigma2Fetch(session, "get_live_categories"))
+      : await iptvFetch<IptvCategory[]>(session, { action: "get_live_categories" });
+  setCached(key, data);
+  return data;
 }
 
-export async function getLiveStreams(username: string, password: string, categoryId?: string): Promise<IptvChannel[]> {
-  if (await shouldUseE2(username, password)) {
-    if (!categoryId) {
-      // Load from all categories
-      const cats = await getLiveCategories(username, password);
-      const allChannels: IptvChannel[] = [];
-      // Load first few categories to avoid timeouts
-      const catsToLoad = cats.slice(0, 30);
-      const results = await Promise.all(
-        catsToLoad.map(cat => loadE2LiveStreams(username, password, cat.category_id).catch(() => []))
-      );
-      let num = 1;
-      for (let ci = 0; ci < results.length; ci++) {
-        for (const ch of results[ci]) {
-          ch.num = num++;
-          ch.stream_id = num;
-          allChannels.push(ch);
-        }
-      }
-      return allChannels;
-    }
-    return loadE2LiveStreams(username, password, categoryId);
+export async function getLiveStreams(
+  appSessionToken: string,
+  categoryId?: string,
+): Promise<SafeChannel[]> {
+  const session = getSession(appSessionToken);
+  const key = cacheKey(session, "liveStreams", categoryId || "all");
+  const cached = getCached<SafeChannel[]>(key);
+  if (cached) return cached;
+  let data: SafeChannel[];
+  if (session.mode === "enigma2") {
+    const categories = categoryId
+      ? [{ category_id: categoryId, category_name: "", parent_id: 0 }]
+      : await getLiveCategories(appSessionToken);
+    const results = await Promise.all(
+      categories.slice(0, 30).map(async (cat) => {
+        const xml = await enigma2Fetch(session, "get_live_streams", cat.category_id);
+        return parseE2Xml(xml).map((ch, i) => sanitizeE2Channel(ch, i, cat.category_id));
+      }),
+    );
+    data = results.flat().map((item, i) => ({ ...item, num: i + 1 }));
+  } else {
+    const params: Record<string, string> = { action: "get_live_streams" };
+    if (categoryId) params.category_id = categoryId;
+    data = (await iptvFetch<RawChannel[]>(session, params)).map(sanitizeXtreamChannel);
   }
-  const params: Record<string, string> = { username, password, action: "get_live_streams" };
-  if (categoryId) params.category_id = categoryId;
-  return iptvFetch<IptvChannel[]>(params);
+  setCached(key, data);
+  return data;
 }
 
-export async function getVodCategories(username: string, password: string): Promise<IptvCategory[]> {
-  if (await shouldUseE2(username, password)) {
-    const xml = await enigma2Fetch(username, password, "get_vod_categories");
-    return parseE2Categories(xml);
-  }
-  return iptvFetch<IptvCategory[]>({ username, password, action: "get_vod_categories" });
+export async function getVodCategories(appSessionToken: string): Promise<IptvCategory[]> {
+  const session = getSession(appSessionToken);
+  const key = cacheKey(session, "vodCategories");
+  const cached = getCached<IptvCategory[]>(key);
+  if (cached) return cached;
+  const data =
+    session.mode === "enigma2"
+      ? parseE2Categories(await enigma2Fetch(session, "get_vod_categories"))
+      : await iptvFetch<IptvCategory[]>(session, { action: "get_vod_categories" });
+  setCached(key, data);
+  return data;
 }
 
-export async function getVodStreams(username: string, password: string, categoryId?: string): Promise<IptvVodItem[]> {
-  if (await shouldUseE2(username, password)) {
-    if (!categoryId) {
-      const cats = await getVodCategories(username, password);
-      const catsToLoad = cats.slice(0, 20);
-      const results = await Promise.all(
-        catsToLoad.map(cat => loadE2VodStreams(username, password, cat.category_id).catch(() => []))
-      );
-      const all: IptvVodItem[] = [];
-      let num = 1;
-      for (const r of results) {
-        for (const v of r) {
-          v.num = num;
-          v.stream_id = num++;
-          all.push(v);
-        }
-      }
-      return all;
-    }
-    return loadE2VodStreams(username, password, categoryId);
+export async function getVodStreams(
+  appSessionToken: string,
+  categoryId?: string,
+): Promise<SafeVodItem[]> {
+  const session = getSession(appSessionToken);
+  const key = cacheKey(session, "vodStreams", categoryId || "all");
+  const cached = getCached<SafeVodItem[]>(key);
+  if (cached) return cached;
+  let data: SafeVodItem[];
+  if (session.mode === "enigma2") {
+    const categories = categoryId
+      ? [{ category_id: categoryId, category_name: "", parent_id: 0 }]
+      : await getVodCategories(appSessionToken);
+    const results = await Promise.all(
+      categories.slice(0, 20).map(async (cat) => {
+        const xml = await enigma2Fetch(session, "get_vod_streams", cat.category_id);
+        return parseE2Xml(xml).map((ch, i) => sanitizeE2Vod(ch, i, cat.category_id));
+      }),
+    );
+    data = results.flat().map((item, i) => ({ ...item, num: i + 1 }));
+  } else {
+    const params: Record<string, string> = { action: "get_vod_streams" };
+    if (categoryId) params.category_id = categoryId;
+    data = (await iptvFetch<RawVodItem[]>(session, params)).map(sanitizeXtreamVod);
   }
-  const params: Record<string, string> = { username, password, action: "get_vod_streams" };
-  if (categoryId) params.category_id = categoryId;
-  return iptvFetch<IptvVodItem[]>(params);
+  setCached(key, data);
+  return data;
 }
 
-export async function getSeriesCategories(username: string, password: string): Promise<IptvCategory[]> {
-  if (await shouldUseE2(username, password)) {
-    const xml = await enigma2Fetch(username, password, "get_series_categories");
-    return parseE2Categories(xml);
-  }
-  return iptvFetch<IptvCategory[]>({ username, password, action: "get_series_categories" });
+export async function getSeriesCategories(appSessionToken: string): Promise<IptvCategory[]> {
+  const session = getSession(appSessionToken);
+  const key = cacheKey(session, "seriesCategories");
+  const cached = getCached<IptvCategory[]>(key);
+  if (cached) return cached;
+  const data =
+    session.mode === "enigma2"
+      ? parseE2Categories(await enigma2Fetch(session, "get_series_categories"))
+      : await iptvFetch<IptvCategory[]>(session, { action: "get_series_categories" });
+  setCached(key, data);
+  return data;
 }
 
-export async function getSeries(username: string, password: string, categoryId?: string): Promise<IptvSeriesItem[]> {
-  if (await shouldUseE2(username, password)) {
-    // For enigma2, series categories work differently — list all categories as series items
-    const xml = await enigma2Fetch(username, password, "get_series_categories");
-    const cats = parseE2Categories(xml);
-    return cats.map((cat, i) => ({
-      num: i + 1,
-      name: cat.category_name,
-      series_id: parseInt(cat.category_id) || i + 1,
-      cover: "",
-      plot: "",
-      cast: "",
-      director: "",
-      genre: cat.category_name,
-      releaseDate: "",
-      last_modified: "",
-      rating: "",
-      rating_5based: 0,
-      backdrop_path: [],
-      youtube_trailer: "",
-      episode_run_time: "",
-      category_id: cat.category_id,
-    }));
+export async function getSeries(
+  appSessionToken: string,
+  categoryId?: string,
+): Promise<SafeSeriesItem[]> {
+  const session = getSession(appSessionToken);
+  const key = cacheKey(session, "series", categoryId || "all");
+  const cached = getCached<SafeSeriesItem[]>(key);
+  if (cached) return cached;
+  let data: SafeSeriesItem[];
+  if (session.mode === "enigma2") {
+    const cats = await getSeriesCategories(appSessionToken);
+    data = cats
+      .filter((cat) => !categoryId || cat.category_id === categoryId)
+      .map(sanitizeE2SeriesCategory);
+  } else {
+    const params: Record<string, string> = { action: "get_series" };
+    if (categoryId) params.category_id = categoryId;
+    data = (await iptvFetch<RawSeriesItem[]>(session, params)).map(sanitizeXtreamSeries);
   }
-  const params: Record<string, string> = { username, password, action: "get_series" };
-  if (categoryId) params.category_id = categoryId;
-  return iptvFetch<IptvSeriesItem[]>(params);
+  setCached(key, data);
+  return data;
 }
 
-export async function getSeriesInfo(username: string, password: string, seriesId: number): Promise<unknown> {
-  if (await shouldUseE2(username, password)) {
-    // Enigma2: load episodes from the series category
-    const xml = await enigma2Fetch(username, password, "get_series_categories");
-    const cats = parseE2Categories(xml);
-    const cat = cats.find(c => parseInt(c.category_id) === seriesId || c.category_id === String(seriesId));
-    if (!cat) return { info: null, episodes: {} };
-    // Fetch series streams for this category
-    const streamsXml = await enigma2Fetch(username, password, "get_vod_streams", cat.category_id);
-    const channels = parseE2Xml(streamsXml);
-    const episodes: Record<string, Array<{ id: number; title: string; stream_url: string; cover: string }>> = { "1": [] };
+export async function getSeriesInfo(appSessionToken: string, seriesId: string): Promise<unknown> {
+  const session = getSession(appSessionToken);
+  const ref = playbackRefs.get(seriesId);
+  if (session.mode === "enigma2") {
+    const categoryId = ref?.categoryId;
+    if (!categoryId) return { info: null, episodes: {} };
+    const xml = await enigma2Fetch(session, "get_vod_streams", categoryId);
+    const channels = parseE2Xml(xml);
+    const episodes: Record<string, SafeEpisode[]> = { "1": [] };
     channels.forEach((ch, i) => {
+      const id = makeContentId(
+        "series",
+        ch.title,
+        categoryId,
+        ch.streamUrl || `${categoryId}:${ch.title}`,
+      );
+      remember(id, {
+        type: "series",
+        mode: "enigma2",
+        categoryId,
+        url: ch.streamUrl,
+        container: "mp4",
+      });
       episodes["1"].push({
-        id: i + 1,
+        id,
+        episode_num: i + 1,
         title: ch.title,
-        stream_url: ch.streamUrl,
-        cover: ch.descImage,
+        container_extension: "mp4",
+        info: { movie_image: ch.descImage },
       });
     });
-    return { info: { name: cat.category_name }, episodes };
+    return { info: { name: "" }, episodes };
   }
-  return iptvFetch({ username, password, action: "get_series_info", series_id: String(seriesId) });
-}
 
-export async function getVodInfo(username: string, password: string, vodId: number): Promise<unknown> {
-  if (await shouldUseE2(username, password)) {
-    return null; // Limited in enigma2 mode
-  }
-  return iptvFetch({ username, password, action: "get_vod_info", vod_id: String(vodId) });
-}
-
-/** Build a stream URL (Xtream mode) */
-export function buildStreamUrl(username: string, password: string, streamId: number, type: "live" | "movie" | "series", container = "ts"): string {
-  const base = getBaseUrl();
-  if (type === "live") return `${base}/live/${username}/${password}/${streamId}.${container}`;
-  if (type === "movie") return `${base}/movie/${username}/${password}/${streamId}.${container}`;
-  return `${base}/series/${username}/${password}/${streamId}.${container}`;
-}
-
-// Stream URL store for enigma2 mode (populated when loading streams)
-const streamUrlStore = new Map<string, string>();
-
-export function registerStreamUrl(key: string, url: string): void {
-  streamUrlStore.set(key, url);
-}
-
-/** Get stream URL — supports both Xtream and Enigma2 */
-export async function getStreamUrl(username: string, password: string, streamId: number, type: "live" | "movie" | "series", container = "ts"): Promise<string> {
-  if (await shouldUseE2(username, password)) {
-    // Look up from the stored URL
-    const key = `${type}:${streamId}`;
-    const cached = streamUrlStore.get(key);
-    if (cached) return cached;
-
-    // Fallback: reload streams and find the URL
-    if (type === "live") {
-      const streams = await getLiveStreams(username, password);
-      const ch = streams.find(s => s.stream_id === streamId);
-      if (ch?.stream_url) return ch.stream_url;
-    } else if (type === "movie") {
-      const streams = await getVodStreams(username, password);
-      const v = streams.find(s => s.stream_id === streamId);
-      if (v?.stream_url) return v.stream_url;
+  const streamId = ref?.streamId;
+  if (!streamId) return { info: null, episodes: {} };
+  const raw = await iptvFetch<Record<string, unknown>>(session, {
+    action: "get_series_info",
+    series_id: streamId,
+  });
+  const episodes = raw.episodes as Record<string, Array<Record<string, unknown>>> | undefined;
+  if (episodes) {
+    for (const eps of Object.values(episodes)) {
+      for (const ep of eps) {
+        const epId = String(ep.id || "");
+        const title = String(ep.title || ep.name || epId);
+        const container = String(ep.container_extension || "mp4");
+        const id = makeContentId("series", title, streamId, `${epId}.${container}`);
+        remember(id, { type: "series", mode: "xtream", streamId: epId, container });
+        ep.id = id;
+      }
     }
-    throw new Error("Stream URL not found");
   }
-  return buildStreamUrl(username, password, streamId, type, container);
+  return raw;
+}
+
+export async function getPlaybackUrl(
+  appSessionToken: string,
+  contentId: string,
+  type: ContentType,
+): Promise<string> {
+  const session = getSession(appSessionToken);
+  let ref = playbackRefs.get(contentId);
+  if (!ref) {
+    if (type === "live") await getLiveStreams(appSessionToken);
+    if (type === "movie") await getVodStreams(appSessionToken);
+    if (type === "series") await getSeries(appSessionToken);
+    ref = playbackRefs.get(contentId);
+  }
+  if (!ref || ref.type !== type) throw new Error("Conteudo nao encontrado");
+  if (ref.mode === "enigma2") {
+    if (!ref.url && type === "series" && ref.categoryId)
+      await getSeriesInfo(appSessionToken, contentId);
+    const refreshed = playbackRefs.get(contentId);
+    if (refreshed?.url) return refreshed.url;
+    if (ref.url) return ref.url;
+    throw new Error("URL de playback nao encontrada");
+  }
+
+  const base = getBaseUrl();
+  const streamId = ref.streamId;
+  if (!streamId) throw new Error("Stream invalido");
+  if (type === "live")
+    return `${base}/live/${session.username}/${session.password}/${streamId}.${ref.container || "ts"}`;
+  if (type === "movie")
+    return `${base}/movie/${session.username}/${session.password}/${streamId}.${ref.container || "mp4"}`;
+  return `${base}/series/${session.username}/${session.password}/${streamId}.${ref.container || "mp4"}`;
 }

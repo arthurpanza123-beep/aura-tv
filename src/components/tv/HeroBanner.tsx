@@ -1,4 +1,4 @@
-import type { ContentItem } from "@/server/tmdb.functions";
+import type { ContentItem } from "@/functions/tmdb.functions";
 import { Play, Plus, Star, Info } from "lucide-react";
 
 interface HeroBannerProps {
@@ -37,9 +37,7 @@ export function HeroBanner({ item }: HeroBannerProps) {
               {item.rating}
             </span>
           )}
-          {item.year && (
-            <span className="text-muted-foreground text-sm">{item.year}</span>
-          )}
+          {item.year && <span className="text-muted-foreground text-sm">{item.year}</span>}
           <span className="text-muted-foreground text-xs uppercase tracking-wider">
             {item.mediaType === "tv" ? "Série" : "Filme"}
           </span>

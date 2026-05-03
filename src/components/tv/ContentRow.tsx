@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ContentCard } from "./ContentCard";
-import type { ContentItem } from "@/server/tmdb.functions";
+import type { ContentItem } from "@/functions/tmdb.functions";
 
 interface ContentRowProps {
   title: string;
@@ -34,9 +34,7 @@ export function ContentRow({ title, items, showRank }: ContentRowProps) {
 
   return (
     <section className="relative mb-3 group/row">
-      <h2 className="text-base font-bold text-[#e8edf4] mb-2 px-8">
-        {title}
-      </h2>
+      <h2 className="text-base font-bold text-[#e8edf4] mb-2 px-8">{title}</h2>
 
       <div className="relative">
         {showLeftArrow && (

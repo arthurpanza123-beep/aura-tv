@@ -12,7 +12,9 @@ interface TVPlayerProps {
 export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
-  const [status, setStatus] = useState<"loading" | "playing" | "paused" | "error" | "unsupported">("loading");
+  const [status, setStatus] = useState<"loading" | "playing" | "paused" | "error" | "unsupported">(
+    "loading",
+  );
   const [errorMsg, setErrorMsg] = useState("");
   const [showControls, setShowControls] = useState(true);
   const [muted, setMuted] = useState(false);
@@ -61,7 +63,12 @@ export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) 
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
             if (!destroyed) {
               video!.play().catch(() => {
-                if (!destroyed) { setStatus("unsupported"); setErrorMsg("Preview indisponível no navegador. O teste completo será feito no APK."); }
+                if (!destroyed) {
+                  setStatus("unsupported");
+                  setErrorMsg(
+                    "Preview indisponível no navegador. O teste completo será feito no APK.",
+                  );
+                }
               });
             }
           });
@@ -107,7 +114,10 @@ export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) 
 
     return () => {
       destroyed = true;
-      if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null; }
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
       video.pause();
       video.removeAttribute("src");
       video.load();
@@ -157,16 +167,26 @@ export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) 
         case " ":
         case "Enter":
           e.preventDefault();
-          if (video) video.paused ? video.play() : video.pause();
+          if (video) {
+            if (video.paused) {
+              video.play();
+            } else {
+              video.pause();
+            }
+          }
           break;
         case "ArrowLeft":
           if (video) video.currentTime = Math.max(0, video.currentTime - 10);
           break;
         case "ArrowRight":
-          if (video && video.duration) video.currentTime = Math.min(video.duration, video.currentTime + 10);
+          if (video && video.duration)
+            video.currentTime = Math.min(video.duration, video.currentTime + 10);
           break;
         case "m":
-          setMuted(m => { if (video) video.muted = !m; return !m; });
+          setMuted((m) => {
+            if (video) video.muted = !m;
+            return !m;
+          });
           break;
         case "Escape":
         case "Backspace":
@@ -188,7 +208,12 @@ export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) 
 
   const togglePlay = () => {
     const video = videoRef.current;
-    if (video) video.paused ? video.play() : video.pause();
+    if (!video) return;
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
+    }
   };
 
   return (
@@ -217,7 +242,8 @@ export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) 
 
       {/* Unsupported / Error state */}
       {status === "unsupported" && (
-        <div className="absolute inset-0 flex items-center justify-center z-20"
+        <div
+          className="absolute inset-0 flex items-center justify-center z-20"
           style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 40%, #0c1a2e 100%)" }}
         >
           <div className="text-center max-w-lg px-8">
@@ -242,10 +268,15 @@ export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) 
 
       {/* Controls overlay (only when playing/paused) */}
       {(status === "playing" || status === "paused") && (
-        <div className={`absolute inset-0 z-30 transition-opacity duration-500 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+        <div
+          className={`absolute inset-0 z-30 transition-opacity duration-500 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        >
           {/* Top bar */}
           <div className="absolute top-0 left-0 right-0 p-6 bg-gradient-to-b from-black/80 to-transparent flex items-center gap-4">
-            <button onClick={onBack} className="text-white hover:text-[#2a9af0] cursor-pointer transition-colors">
+            <button
+              onClick={onBack}
+              className="text-white hover:text-[#2a9af0] cursor-pointer transition-colors"
+            >
               <ArrowLeft className="w-8 h-8" />
             </button>
             <div>
@@ -257,7 +288,10 @@ export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) 
           {/* Center play/pause */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <button
-              onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay();
+              }}
               className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 cursor-pointer pointer-events-auto transition-all"
             >
               {status === "paused" ? (
@@ -282,7 +316,10 @@ export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) 
                 }}
               >
                 <div className="w-full h-1 group-hover:h-2.5 rounded-full bg-white/20 transition-all">
-                  <div className="h-full rounded-full bg-[#2a9af0] relative" style={{ width: `${progress}%` }}>
+                  <div
+                    className="h-full rounded-full bg-[#2a9af0] relative"
+                    style={{ width: `${progress}%` }}
+                  >
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#2a9af0] shadow-lg shadow-[#2a9af0]/50 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
@@ -301,7 +338,15 @@ export function TVPlayer({ streamUrl, title, subtitle, onBack }: TVPlayerProps) 
                 </span>
               )}
               <div className="flex items-center gap-4">
-                <button onClick={() => setMuted(m => { if (videoRef.current) videoRef.current.muted = !m; return !m; })} className="text-white/60 hover:text-white cursor-pointer">
+                <button
+                  onClick={() =>
+                    setMuted((m) => {
+                      if (videoRef.current) videoRef.current.muted = !m;
+                      return !m;
+                    })
+                  }
+                  className="text-white/60 hover:text-white cursor-pointer"
+                >
                   {muted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
                 </button>
               </div>

@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { TVSidebar } from "@/components/tv/TVSidebar";
 import { TVPlayer } from "@/components/tv/TVPlayer";
 import { LoadingScreen } from "@/components/tv/LoadingScreen";
 import { useIptvCredentials } from "@/hooks/useIptvCredentials";
-import { fetchSeriesInfoFn, getStreamUrlFn } from "@/server/iptv.functions";
+import { fetchSeriesInfoFn, getPlaybackUrlFn } from "@/functions/iptv.functions";
 import { Play, ArrowLeft, Clapperboard, Loader2, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/details/$id")({
@@ -52,6 +53,8 @@ function DetailsPage() {
   const { id } = Route.useParams();
   const creds = useIptvCredentials();
   const navigate = useNavigate();
+  const fetchSeriesInfo = useServerFn(fetchSeriesInfoFn);
+  const getPlaybackUrl = useServerFn(getPlaybackUrlFn);
 
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<SeriesDetail | null>(null);
@@ -67,14 +70,16 @@ function DetailsPage() {
 
     async function load() {
       try {
-        const result = await fetchSeriesInfoFn({ data: { ...creds, seriesId: Number(id) } });
+        const result = await fetchSeriesInfo({ data: { ...creds, seriesId: id } });
         if (!cancelled) {
           const parsed: SeriesDetail = JSON.parse(result.info);
           setDetail(parsed);
           // Find first season
           const seasons = parsed.episodes || parsed.seasons;
           if (seasons) {
-            const keys = Object.keys(seasons).map(Number).sort((a, b) => a - b);
+            const keys = Object.keys(seasons)
+              .map(Number)
+              .sort((a, b) => a - b);
             if (keys.length > 0) setActiveSeason(keys[0]);
           }
         }
@@ -86,16 +91,20 @@ function DetailsPage() {
       }
     }
     load();
-    return () => { cancelled = true; };
-  }, [creds, id]);
+    return () => {
+      cancelled = true;
+    };
+  }, [creds, id, fetchSeriesInfo]);
 
   const handleWatchEpisode = async (episode: Episode) => {
     if (!creds) return;
-    setPlayerTitle(`${detail?.info?.name || "Série"} — Ep ${episode.episode_num}: ${episode.title}`);
+    setPlayerTitle(
+      `${detail?.info?.name || "Série"} — Ep ${episode.episode_num}: ${episode.title}`,
+    );
     setShowPlayer(true);
     try {
-      const result = await getStreamUrlFn({
-        data: { ...creds, streamId: Number(episode.id), type: "series", container: episode.container_extension || "mp4" },
+      const result = await getPlaybackUrl({
+        data: { ...creds, contentId: episode.id, type: "series" },
       });
       setPlayerStreamUrl(result.url);
     } catch {
@@ -105,10 +114,18 @@ function DetailsPage() {
 
   if (!creds) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center" style={{ background: "#0a1628" }}>
+      <div
+        className="flex h-screen w-screen items-center justify-center"
+        style={{ background: "#0a1628" }}
+      >
         <div className="text-center">
           <p className="text-[#6b7f99] mb-4">Sessão expirada</p>
-          <button onClick={() => navigate({ to: "/" })} className="px-6 py-2 bg-[#1a5a8a] text-white rounded-lg cursor-pointer">Fazer Login</button>
+          <button
+            onClick={() => navigate({ to: "/" })}
+            className="px-6 py-2 bg-[#1a5a8a] text-white rounded-lg cursor-pointer"
+          >
+            Fazer Login
+          </button>
         </div>
       </div>
     );
@@ -120,14 +137,20 @@ function DetailsPage() {
         streamUrl={playerStreamUrl}
         title={playerTitle}
         subtitle="Série"
-        onBack={() => { setShowPlayer(false); setPlayerStreamUrl(""); }}
+        onBack={() => {
+          setShowPlayer(false);
+          setPlayerStreamUrl("");
+        }}
       />
     );
   }
 
   if (loading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center" style={{ background: "#0a1628" }}>
+      <div
+        className="flex h-screen w-screen items-center justify-center"
+        style={{ background: "#0a1628" }}
+      >
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-[#2a9af0] animate-spin mx-auto mb-4" />
           <p className="text-[#6b7f99]">Carregando detalhes...</p>
@@ -145,7 +168,12 @@ function DetailsPage() {
             <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
             <p className="text-[#e8edf4] text-lg mb-2">Erro</p>
             <p className="text-[#6b7f99] text-sm mb-4">{error || "Série não encontrada"}</p>
-            <button onClick={() => window.history.back()} className="px-6 py-2 bg-[#1a5a8a] text-white rounded-lg cursor-pointer">Voltar</button>
+            <button
+              onClick={() => window.history.back()}
+              className="px-6 py-2 bg-[#1a5a8a] text-white rounded-lg cursor-pointer"
+            >
+              Voltar
+            </button>
           </div>
         </main>
       </div>
@@ -154,19 +182,29 @@ function DetailsPage() {
 
   const info = detail.info || {};
   const seasonsData = detail.episodes || detail.seasons || {};
-  const seasonKeys = Object.keys(seasonsData).map(Number).sort((a, b) => a - b);
+  const seasonKeys = Object.keys(seasonsData)
+    .map(Number)
+    .sort((a, b) => a - b);
   const currentEpisodes = seasonsData[String(activeSeason)] || [];
   const backdrop = info.backdrop_path?.[0] || info.cover || "";
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden" style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #0c1a2e 100%)" }}>
+    <div
+      className="flex h-screen w-screen overflow-hidden"
+      style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #0c1a2e 100%)" }}
+    >
       <TVSidebar />
 
       <main className="flex-1 ml-16 overflow-y-auto overflow-x-hidden">
         {/* Backdrop header */}
         <div className="relative w-full" style={{ height: "45vh", minHeight: 300 }}>
           {backdrop ? (
-            <img src={backdrop} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            <img
+              src={backdrop}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-[#0f1e35] to-[#0a1628]" />
           )}
@@ -182,27 +220,52 @@ function DetailsPage() {
 
           <div className="absolute bottom-0 left-0 right-0 px-10 pb-6 flex items-end gap-8">
             {info.cover && (
-              <img src={info.cover} alt={info.name} className="w-32 rounded-xl shadow-xl border border-[#1a2e48] hidden lg:block" loading="lazy"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              <img
+                src={info.cover}
+                alt={info.name}
+                className="w-32 rounded-xl shadow-xl border border-[#1a2e48] hidden lg:block"
+                loading="lazy"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
             )}
             <div className="flex-1">
               <h1 className="text-3xl font-black text-white mb-2">{info.name || `Série #${id}`}</h1>
               <div className="flex items-center gap-4 mb-3 text-sm flex-wrap">
                 {info.rating && Number(info.rating) > 0 && (
-                  <span className="text-yellow-400 font-semibold">★ {Number(info.rating).toFixed(1)}</span>
+                  <span className="text-yellow-400 font-semibold">
+                    ★ {Number(info.rating).toFixed(1)}
+                  </span>
                 )}
                 {info.releaseDate && <span className="text-[#6b7f99]">{info.releaseDate}</span>}
                 {info.genre && <span className="text-[#6b7f99]">{info.genre}</span>}
                 {seasonKeys.length > 0 && (
-                  <span className="text-[#6b7f99]">{seasonKeys.length} temporada{seasonKeys.length > 1 ? "s" : ""}</span>
+                  <span className="text-[#6b7f99]">
+                    {seasonKeys.length} temporada{seasonKeys.length > 1 ? "s" : ""}
+                  </span>
                 )}
               </div>
               {info.plot && (
-                <p className="text-[#8a9bb5] text-sm leading-relaxed max-w-2xl line-clamp-3 mb-3">{info.plot}</p>
+                <p className="text-[#8a9bb5] text-sm leading-relaxed max-w-2xl line-clamp-3 mb-3">
+                  {info.plot}
+                </p>
               )}
               <div className="flex items-center gap-3 text-xs text-[#6b7f99]">
-                {info.director && <span>Diretor: <span className="text-[#e8edf4]">{info.director}</span></span>}
-                {info.cast && <span>Elenco: <span className="text-[#e8edf4]">{info.cast.slice(0, 80)}{info.cast.length > 80 ? "..." : ""}</span></span>}
+                {info.director && (
+                  <span>
+                    Diretor: <span className="text-[#e8edf4]">{info.director}</span>
+                  </span>
+                )}
+                {info.cast && (
+                  <span>
+                    Elenco:{" "}
+                    <span className="text-[#e8edf4]">
+                      {info.cast.slice(0, 80)}
+                      {info.cast.length > 80 ? "..." : ""}
+                    </span>
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -213,7 +276,7 @@ function DetailsPage() {
           {/* Season tabs */}
           {seasonKeys.length > 1 && (
             <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">
-              {seasonKeys.map(s => (
+              {seasonKeys.map((s) => (
                 <button
                   key={s}
                   onClick={() => setActiveSeason(s)}
@@ -230,7 +293,9 @@ function DetailsPage() {
           )}
 
           {seasonKeys.length === 1 && (
-            <h2 className="text-lg font-bold text-[#e8edf4] mb-4">Temporada {seasonKeys[0]} · Episódios</h2>
+            <h2 className="text-lg font-bold text-[#e8edf4] mb-4">
+              Temporada {seasonKeys[0]} · Episódios
+            </h2>
           )}
 
           {/* Episodes grid */}
@@ -261,7 +326,13 @@ function EpisodeRow({ episode, onWatch }: { episode: Episode; onWatch: (ep: Epis
       {/* Thumbnail */}
       <div className="w-40 aspect-video rounded-lg overflow-hidden bg-[#0f1e35] shrink-0 relative">
         {thumb && !imgError ? (
-          <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" onError={() => setImgError(true)} />
+          <img
+            src={thumb}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Clapperboard className="w-8 h-8 text-[#1a2e48]" />
@@ -275,7 +346,8 @@ function EpisodeRow({ episode, onWatch }: { episode: Episode; onWatch: (ep: Epis
       {/* Info */}
       <div className="flex-1 min-w-0">
         <p className="text-white text-sm font-semibold mb-0.5">
-          Ep {episode.episode_num}{episode.title ? ` — ${episode.title}` : ""}
+          Ep {episode.episode_num}
+          {episode.title ? ` — ${episode.title}` : ""}
         </p>
         {episode.info?.duration && (
           <p className="text-[#6b7f99] text-xs">{episode.info.duration}</p>

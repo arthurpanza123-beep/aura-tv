@@ -1,8 +1,16 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  Home, Tv, Film, Clapperboard, Baby, Heart,
-  Search, User, ChevronLeft, ChevronRight,
+  Home,
+  Tv,
+  Film,
+  Clapperboard,
+  Baby,
+  Heart,
+  Search,
+  User,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import logoImg from "@/assets/logo-central-play.png";
 
@@ -66,9 +74,14 @@ export function TVSidebar() {
               }`}
               tabIndex={0}
             >
-              <item.icon className={`shrink-0 ${isActive ? "text-[#2a9af0]" : ""}`} style={{ width: 20, height: 20 }} />
+              <item.icon
+                className={`shrink-0 ${isActive ? "text-[#2a9af0]" : ""}`}
+                style={{ width: 20, height: 20 }}
+              />
               {expanded && (
-                <span className={`text-sm font-semibold whitespace-nowrap overflow-hidden ${isActive ? "text-[#2a9af0]" : ""}`}>
+                <span
+                  className={`text-sm font-semibold whitespace-nowrap overflow-hidden ${isActive ? "text-[#2a9af0]" : ""}`}
+                >
                   {item.label}
                 </span>
               )}

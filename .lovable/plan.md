@@ -1,4 +1,3 @@
-
 # Redesign Central Play Plus — Estilo Netflix/HBO Max com TMDB
 
 Redesign completo da interface para parecer com Netflix, HBO Max, Claro TV+. Capas de filmes/séries reais buscadas automaticamente da API TMDB. Arquitetura escalável.
@@ -57,17 +56,17 @@ Redesign completo da interface para parecer com Netflix, HBO Max, Claro TV+. Cap
 
 ### 6. Arquivos Criados/Modificados
 
-| Arquivo | Ação |
-|---------|------|
-| `src/server/tmdb.server.ts` | Criar — queries TMDB |
-| `src/server/tmdb.functions.ts` | Criar — server functions |
-| `src/components/tv/Navbar.tsx` | Criar — nav superior |
-| `src/components/tv/HeroBanner.tsx` | Criar — hero banner |
-| `src/components/tv/ContentRow.tsx` | Criar — fileira de cards |
-| `src/components/tv/ContentCard.tsx` | Criar — card individual |
-| `src/routes/home.tsx` | Reescrever — composição das fileiras |
-| `src/routes/index.tsx` | Ajustar — login melhorado |
-| `src/styles.css` | Ajustar — tokens extras |
+| Arquivo                             | Ação                                 |
+| ----------------------------------- | ------------------------------------ |
+| `src/server/tmdb.server.ts`         | Criar — queries TMDB                 |
+| `src/server/tmdb.functions.ts`      | Criar — server functions             |
+| `src/components/tv/Navbar.tsx`      | Criar — nav superior                 |
+| `src/components/tv/HeroBanner.tsx`  | Criar — hero banner                  |
+| `src/components/tv/ContentRow.tsx`  | Criar — fileira de cards             |
+| `src/components/tv/ContentCard.tsx` | Criar — card individual              |
+| `src/routes/home.tsx`               | Reescrever — composição das fileiras |
+| `src/routes/index.tsx`              | Ajustar — login melhorado            |
+| `src/styles.css`                    | Ajustar — tokens extras              |
 
 ### Nota sobre API Key
 

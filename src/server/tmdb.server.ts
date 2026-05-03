@@ -64,7 +64,9 @@ async function tmdbFetch<T>(endpoint: string, params: Record<string, string> = {
   } else if (apiKey) {
     url.searchParams.set("api_key", apiKey);
   } else {
-    throw new Error("TMDB API: Nenhuma chave configurada. Adicione TMDB_API_KEY ou TMDB_READ_TOKEN.");
+    throw new Error(
+      "TMDB API: Nenhuma chave configurada. Adicione TMDB_API_KEY ou TMDB_READ_TOKEN.",
+    );
   }
 
   const res = await fetch(url.toString(), { headers });
@@ -74,7 +76,10 @@ async function tmdbFetch<T>(endpoint: string, params: Record<string, string> = {
   return res.json() as Promise<T>;
 }
 
-export async function getTrending(mediaType: "movie" | "tv" | "all" = "all", timeWindow: "day" | "week" = "week"): Promise<TMDBMovie[]> {
+export async function getTrending(
+  mediaType: "movie" | "tv" | "all" = "all",
+  timeWindow: "day" | "week" = "week",
+): Promise<TMDBMovie[]> {
   const data = await tmdbFetch<TMDBResponse>(`/trending/${mediaType}/${timeWindow}`);
   return data.results;
 }

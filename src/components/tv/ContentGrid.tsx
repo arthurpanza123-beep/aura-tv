@@ -1,5 +1,5 @@
 import { ContentCard } from "./ContentCard";
-import type { ContentItem } from "@/server/tmdb.functions";
+import type { ContentItem } from "@/functions/tmdb.functions";
 
 interface ContentGridProps {
   items: ContentItem[];
