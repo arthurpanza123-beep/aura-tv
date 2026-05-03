@@ -90,10 +90,12 @@
   --tv-surface-hover: #162a42;
 }
 
-/* Force no scroll on body for TV */
+/* TV base */
 html, body {
   overflow: hidden;
   height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 @layer base {
