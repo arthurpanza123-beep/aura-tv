@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 
@@ -21,7 +21,7 @@ const PROFILES = [
 function ProfilesPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background relative overflow-hidden">
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-10 blur-[120px]" style={{ backgroundColor: "var(--tv-glow)" }} />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-10 blur-[120px] pointer-events-none" style={{ backgroundColor: "var(--tv-glow)" }} />
 
       <div className="flex items-center gap-3 mb-12">
         <img src={logoImg} alt="Central Play Plus" className="w-12 h-12 object-contain" />
@@ -34,11 +34,11 @@ function ProfilesPage() {
         Quem está assistindo?
       </h1>
 
-      <div className="flex items-center justify-center gap-6 lg:gap-10 flex-wrap">
+      <div className="flex items-center justify-center gap-6 lg:gap-10 flex-wrap relative z-10">
         {PROFILES.map((profile) => (
-          <a
+          <Link
             key={profile.id}
-            href={profile.href}
+            to={profile.href as "/home"}
             className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group no-underline"
             tabIndex={0}
           >
@@ -51,7 +51,7 @@ function ProfilesPage() {
             <span className="text-sm lg:text-base text-muted-foreground group-hover:text-foreground group-focus:text-foreground transition-colors">
               {profile.name}
             </span>
-          </a>
+          </Link>
         ))}
 
         <div
