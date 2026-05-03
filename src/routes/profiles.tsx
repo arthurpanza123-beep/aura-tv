@@ -21,12 +21,9 @@ const PROFILES = [
 function ProfilesPage() {
   const navigate = useNavigate();
 
-  const handleProfileClick = async (to: string) => {
-    try {
-      await navigate({ to: to as "/home" });
-    } catch {
-      window.location.href = to;
-    }
+  const handleProfileClick = (to: string) => {
+    console.log("Profile clicked, navigating to:", to);
+    navigate({ to: to as "/home" });
   };
 
   return (
