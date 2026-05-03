@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { TVSidebar } from "@/components/tv/TVSidebar";
 import { LoadingScreen } from "@/components/tv/LoadingScreen";
+import { TVPlayer } from "@/components/tv/TVPlayer";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Play, X, ChevronUp, Tv, Search, Radio, AlertTriangle } from "lucide-react";
 import { useIptvCredentials } from "@/hooks/useIptvCredentials";
