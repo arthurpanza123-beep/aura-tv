@@ -4,9 +4,13 @@
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
 
-// Public read-only TMDB API key (safe to embed — only reads public movie data)
+// TMDB API key — get a free one at https://www.themoviedb.org/settings/api
 function getApiKey(): string {
-  return process.env.TMDB_API_KEY || "d6eb6eb38560490580f6e75e2a884735";
+  return process.env.TMDB_API_KEY || "";
+}
+
+function getReadToken(): string {
+  return process.env.TMDB_READ_TOKEN || "";
 }
 
 export interface TMDBMovie {
