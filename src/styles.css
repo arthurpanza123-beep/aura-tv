@@ -218,3 +218,7 @@ html, body {
   transform: scale(1.08);
   box-shadow: 0 0 20px 4px rgba(42, 122, 176, 0.3);
 }
+
+/* Hide scrollbar for category pills */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
