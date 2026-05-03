@@ -46,6 +46,9 @@ function ChannelsPage() {
   const [error, setError] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [playerMsg, setPlayerMsg] = useState("");
+  const [playerStreamUrl, setPlayerStreamUrl] = useState("");
+  const [playerTitle, setPlayerTitle] = useState("");
+  const [showPlayer, setShowPlayer] = useState(false);
 
   // Load data
   useEffect(() => {
