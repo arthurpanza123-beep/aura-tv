@@ -149,20 +149,20 @@ function MoviesPage() {
     );
   }
 
+  if (showPlayer) {
+    return (
+      <TVPlayer
+        streamUrl={playerStreamUrl}
+        title={playerTitle}
+        subtitle="Filme"
+        onBack={() => { setShowPlayer(false); setPlayerStreamUrl(""); }}
+      />
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden" style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #0c1a2e 100%)" }}>
       <TVSidebar />
-
-      {/* Player message overlay */}
-      {playerMsg && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#0f1e35] border border-[#1a2e48] rounded-2xl p-8 max-w-md text-center">
-            <Tv className="w-12 h-12 text-[#2a9af0] mx-auto mb-4" />
-            <p className="text-[#e8edf4] font-semibold mb-2">{playerMsg}</p>
-            <button onClick={() => setPlayerMsg("")} className="mt-4 px-6 py-2 bg-[#1a5a8a] text-white rounded-lg cursor-pointer text-sm">OK</button>
-          </div>
-        </div>
-      )}
 
       <main className="flex-1 ml-16 overflow-y-auto overflow-x-hidden"
         onScroll={(e) => {
