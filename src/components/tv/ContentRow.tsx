@@ -34,7 +34,7 @@ export function ContentRow({ title, items, showRank }: ContentRowProps) {
 
   return (
     <section className="relative mb-3 group/row">
-      <h2 className="text-base font-bold text-[#e8edf4] mb-2 px-10">
+      <h2 className="text-base font-bold text-[#e8edf4] mb-2 px-8">
         {title}
       </h2>
 
@@ -51,7 +51,7 @@ export function ContentRow({ title, items, showRank }: ContentRowProps) {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex gap-3 overflow-x-auto px-10 pb-2 scroll-smooth"
+          className="flex gap-3 overflow-x-auto px-8 pb-2 scroll-smooth"
         >
           {items.map((item, i) => (
             <ContentCard key={`${item.id}-${i}`} item={item} index={i} showRank={showRank} />
