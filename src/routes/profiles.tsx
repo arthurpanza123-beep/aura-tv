@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 
@@ -12,20 +12,13 @@ export const Route = createFileRoute("/profiles")({
 });
 
 const PROFILES = [
-  { id: 1, name: "João", color: "oklch(0.6 0.25 255)", initials: "JO", to: "/home" },
-  { id: 2, name: "Maria", color: "oklch(0.65 0.2 150)", initials: "MA", to: "/home" },
-  { id: 3, name: "Pedro", color: "oklch(0.6 0.22 30)", initials: "PE", to: "/home" },
-  { id: 4, name: "Kids", color: "oklch(0.7 0.2 330)", initials: "🧸", to: "/kids" },
+  { id: 1, name: "João", color: "oklch(0.6 0.25 255)", initials: "JO", href: "/home" },
+  { id: 2, name: "Maria", color: "oklch(0.65 0.2 150)", initials: "MA", href: "/home" },
+  { id: 3, name: "Pedro", color: "oklch(0.6 0.22 30)", initials: "PE", href: "/home" },
+  { id: 4, name: "Kids", color: "oklch(0.7 0.2 330)", initials: "🧸", href: "/kids" },
 ];
 
 function ProfilesPage() {
-  const navigate = useNavigate();
-
-  const handleProfileClick = (to: string) => {
-    console.log("Profile clicked, navigating to:", to);
-    navigate({ to: to as "/home" });
-  };
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background relative overflow-hidden">
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-10 blur-[120px]" style={{ backgroundColor: "var(--tv-glow)" }} />
@@ -43,10 +36,10 @@ function ProfilesPage() {
 
       <div className="flex items-center justify-center gap-6 lg:gap-10 flex-wrap">
         {PROFILES.map((profile) => (
-          <button
+          <a
             key={profile.id}
-            onClick={() => handleProfileClick(profile.to)}
-            className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group bg-transparent border-none"
+            href={profile.href}
+            className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group no-underline"
             tabIndex={0}
           >
             <div
@@ -58,11 +51,11 @@ function ProfilesPage() {
             <span className="text-sm lg:text-base text-muted-foreground group-hover:text-foreground group-focus:text-foreground transition-colors">
               {profile.name}
             </span>
-          </button>
+          </a>
         ))}
 
-        <button
-          className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group bg-transparent border-none"
+        <div
+          className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group"
           tabIndex={0}
         >
           <div className="w-20 h-20 lg:w-28 lg:h-28 rounded-full flex items-center justify-center border-4 border-border group-hover:border-primary group-focus:border-primary transition-colors bg-card">
@@ -71,7 +64,7 @@ function ProfilesPage() {
           <span className="text-sm lg:text-base text-muted-foreground group-hover:text-foreground transition-colors">
             Adicionar
           </span>
-        </button>
+        </div>
       </div>
     </div>
   );
