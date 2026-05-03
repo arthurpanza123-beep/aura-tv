@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { ContentRow } from "@/components/tv/ContentRow";
+import { ContentCard } from "@/components/tv/ContentCard";
 import type { ContentItem } from "@/server/tmdb.functions";
-import {
-  Play, Plus, Star, ArrowLeft, Clock, Calendar, Film, Users, X,
-} from "lucide-react";
+import { Play, Plus, Star, ArrowLeft, Clock, Calendar, Film, Users, X } from "lucide-react";
 
 export const Route = createFileRoute("/details/$id")({
   head: () => ({
@@ -43,130 +41,80 @@ function DetailsPage() {
   const [showTrailer, setShowTrailer] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Backdrop */}
-      <div className="relative w-full h-[50vh] lg:h-[60vh] min-h-[350px] overflow-hidden">
+    <div className="tv-shell" style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #111e35 60%, #0c1a2e 100%)" }}>
+      {/* Top half - backdrop */}
+      <div className="relative w-full flex-shrink-0" style={{ height: "45vh" }}>
         <img src={DEMO_DETAIL.backdrop} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] via-[#0a1628]/50 to-[#0a1628]/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a1628]/80 to-transparent" />
 
         <a
           href="#"
           onClick={(e) => { e.preventDefault(); window.history.back(); }}
-          className="absolute top-6 left-6 z-20 flex items-center gap-2 px-5 py-3 rounded-xl bg-background/60 backdrop-blur-sm text-foreground hover:bg-background/80 transition-colors cursor-pointer no-underline text-base font-semibold"
+          className="absolute top-5 left-6 z-20 flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0a1628]/60 backdrop-blur-sm text-[#e8edf4] hover:bg-[#0a1628]/80 cursor-pointer no-underline text-sm font-semibold transition-colors"
         >
-          <ArrowLeft className="w-6 h-6" />
-          Voltar
+          <ArrowLeft className="w-5 h-5" /> Voltar
         </a>
-      </div>
 
-      {/* Content */}
-      <div className="relative z-10 -mt-36 px-6 lg:px-12 pb-12">
-        <div className="flex flex-col lg:flex-row gap-10">
-          {/* Poster */}
-          <div className="hidden lg:block shrink-0">
-            <img
-              src={DEMO_DETAIL.poster}
-              alt={DEMO_DETAIL.title}
-              className="w-72 rounded-2xl shadow-2xl shadow-black/50 border-2 border-border"
-            />
-          </div>
-
-          {/* Info */}
+        {/* Content overlay */}
+        <div className="absolute bottom-0 left-0 right-0 px-10 pb-5 flex items-end gap-8">
+          <img src={DEMO_DETAIL.poster} alt={DEMO_DETAIL.title} className="w-36 rounded-xl shadow-xl border border-[#1a2e48] hidden lg:block" />
           <div className="flex-1">
-            <h1 className="text-4xl lg:text-6xl font-black text-foreground mb-2">{DEMO_DETAIL.title}</h1>
-            <p className="text-sm text-muted-foreground mb-5">{DEMO_DETAIL.originalTitle}</p>
-
-            {/* Meta */}
-            <div className="flex flex-wrap items-center gap-5 mb-6">
-              <span className="flex items-center gap-1 text-yellow-400 font-bold text-xl">
-                <Star className="w-6 h-6 fill-yellow-400" />
-                {DEMO_DETAIL.rating}
+            <h1 className="text-3xl font-bold text-white mb-1">{DEMO_DETAIL.title}</h1>
+            <div className="flex items-center gap-4 mb-3 text-sm">
+              <span className="flex items-center gap-1 text-yellow-400 font-semibold">
+                <Star className="w-4 h-4 fill-yellow-400" /> {DEMO_DETAIL.rating}
               </span>
-              <span className="flex items-center gap-2 text-muted-foreground text-base">
-                <Calendar className="w-5 h-5" /> {DEMO_DETAIL.year}
-              </span>
-              <span className="flex items-center gap-2 text-muted-foreground text-base">
-                <Clock className="w-5 h-5" /> {DEMO_DETAIL.duration}
-              </span>
-              <span className="flex items-center gap-2 text-muted-foreground text-base">
-                <Film className="w-5 h-5" /> {(DEMO_DETAIL.mediaType as string) === "tv" ? "Série" : "Filme"}
-              </span>
+              <span className="text-[#6b7f99]">{DEMO_DETAIL.year}</span>
+              <span className="text-[#6b7f99]">{DEMO_DETAIL.duration}</span>
+              <span className="text-[#6b7f99]">Filme</span>
             </div>
-
-            {/* Genres */}
-            <div className="flex gap-2 mb-8">
+            <div className="flex gap-2 mb-3">
               {DEMO_DETAIL.genres.map(g => (
-                <span key={g} className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20">
-                  {g}
-                </span>
+                <span key={g} className="px-3 py-1 rounded-full bg-[#1a5a8a]/15 text-[#2a7ab0] text-xs font-semibold border border-[#2a7ab0]/20">{g}</span>
               ))}
             </div>
-
-            {/* Buttons */}
-            <div className="flex items-center gap-4 mb-8">
-              <a
-                href={`/player/${id}`}
-                className="tv-btn flex items-center gap-3 h-16 px-10 rounded-xl bg-primary text-primary-foreground font-bold text-lg cursor-pointer hover:bg-primary/90 no-underline transition-all"
-                tabIndex={0}
-              >
-                <Play className="w-6 h-6 fill-current" />
-                Assistir
+            <div className="flex items-center gap-3">
+              <a href={`/player/${id}`} className="tv-btn flex items-center gap-2 h-10 px-6 rounded-lg bg-[#1a5a8a] hover:bg-[#1e6a9e] text-white font-bold text-sm cursor-pointer no-underline transition-all" tabIndex={0}>
+                <Play className="w-4 h-4 fill-current" /> Assistir
               </a>
-              <button
-                onClick={() => setShowTrailer(true)}
-                className="tv-btn flex items-center gap-2 h-16 px-8 rounded-xl bg-secondary text-secondary-foreground font-semibold text-base cursor-pointer hover:bg-secondary/80 transition-all"
-                tabIndex={0}
-              >
-                <Play className="w-5 h-5" />
-                Trailer
+              <button onClick={() => setShowTrailer(true)} className="tv-btn flex items-center gap-2 h-10 px-5 rounded-lg bg-[#162a42] hover:bg-[#1a3050] text-[#c8d4e0] font-semibold text-sm cursor-pointer transition-all" tabIndex={0}>
+                <Play className="w-4 h-4" /> Trailer
               </button>
-              <button className="tv-btn flex items-center justify-center h-16 w-16 rounded-xl border-2 border-border text-muted-foreground cursor-pointer hover:border-primary hover:text-primary transition-all" tabIndex={0}>
-                <Plus className="w-6 h-6" />
+              <button className="tv-btn h-10 w-10 rounded-lg border border-[#1a2e48] text-[#6b7f99] flex items-center justify-center cursor-pointer hover:border-[#2a7ab0] hover:text-[#2a7ab0] transition-all" tabIndex={0}>
+                <Plus className="w-4 h-4" />
               </button>
-            </div>
-
-            {/* Overview */}
-            <p className="text-foreground/80 text-lg leading-relaxed mb-8 max-w-2xl">
-              {DEMO_DETAIL.overview}
-            </p>
-
-            {/* Director & Cast */}
-            <div className="space-y-3 text-base">
-              <p><span className="text-muted-foreground">Diretor:</span> <span className="text-foreground font-semibold">{DEMO_DETAIL.director}</span></p>
-              <p className="flex items-start gap-2">
-                <Users className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
-                <span><span className="text-muted-foreground">Elenco:</span> <span className="text-foreground">{DEMO_DETAIL.cast.join(", ")}</span></span>
-              </p>
             </div>
           </div>
-        </div>
-
-        {/* Trailer modal */}
-        {showTrailer && (
-          <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-6">
-            <div className="relative w-full max-w-5xl aspect-video">
-              <button
-                onClick={() => setShowTrailer(false)}
-                className="absolute -top-14 right-0 text-foreground hover:text-primary cursor-pointer transition-colors"
-              >
-                <X className="w-10 h-10" />
-              </button>
-              <iframe
-                src={DEMO_DETAIL.trailerUrl}
-                className="w-full h-full rounded-2xl"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Similar */}
-        <div className="mt-14">
-          <ContentRow title="🎬 Recomendações Similares" items={SIMILAR} />
         </div>
       </div>
+
+      {/* Bottom half - info + similar */}
+      <div className="flex-1 min-h-0 flex flex-col px-10 pt-4">
+        <div className="flex gap-8 mb-4">
+          <p className="text-[#8a9bb5] text-sm leading-relaxed max-w-xl flex-1">{DEMO_DETAIL.overview}</p>
+          <div className="text-sm space-y-1 shrink-0">
+            <p><span className="text-[#6b7f99]">Diretor:</span> <span className="text-[#e8edf4] font-medium">{DEMO_DETAIL.director}</span></p>
+            <p><span className="text-[#6b7f99]">Elenco:</span> <span className="text-[#e8edf4]">{DEMO_DETAIL.cast.join(", ")}</span></p>
+          </div>
+        </div>
+
+        <h2 className="text-base font-bold text-[#e8edf4] mb-2">Recomendações</h2>
+        <div className="flex gap-3 overflow-x-auto pb-2">
+          {SIMILAR.map((item, i) => (
+            <ContentCard key={item.id} item={item} index={i} />
+          ))}
+        </div>
+      </div>
+
+      {showTrailer && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-6">
+          <div className="relative w-full max-w-4xl aspect-video">
+            <button onClick={() => setShowTrailer(false)} className="absolute -top-12 right-0 text-white hover:text-[#2a7ab0] cursor-pointer"><X className="w-8 h-8" /></button>
+            <iframe src={DEMO_DETAIL.trailerUrl} className="w-full h-full rounded-xl" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

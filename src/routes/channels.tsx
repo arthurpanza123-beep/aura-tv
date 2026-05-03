@@ -244,7 +244,7 @@ function ChannelsPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="tv-shell"
       style={{
         background:
           "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #111e35 60%, #0c1a2e 100%)",
@@ -253,30 +253,27 @@ function ChannelsPage() {
       <Navbar activeTab="channels" />
 
       {/* Filter pills */}
-      <div className="pt-20 lg:pt-24 px-6 lg:px-10">
-        <div className="flex gap-2 pb-4">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => {
-                setActiveCategory(cat);
-                setSelectedIndex(0);
-              }}
-              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer border ${
-                activeCategory === cat
-                  ? "bg-[#1a5276] text-white border-[#2a7ab0]/50"
-                  : "bg-transparent text-[#8a9bb5] border-[#1e3050] hover:text-white hover:border-[#2a5580]"
-              }`}
-              tabIndex={0}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+      <div className="pt-14 px-10 flex gap-2 py-2">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => {
+              setActiveCategory(cat);
+              setSelectedIndex(0);
+            }}
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
+              activeCategory === cat
+                ? "bg-[#1a5276] text-white border-[#2a7ab0]/50"
+                : "bg-transparent text-[#6b7f99] border-[#1a2e48] hover:text-white hover:border-[#2a5580]"
+            }`}
+            tabIndex={0}
+          >
+            {cat}
+          </button>
+        ))}
       </div>
 
-      {/* Main content - split layout */}
-      <div className="flex-1 flex px-6 lg:px-10 gap-6 pb-16 min-h-0">
+      <div className="flex-1 flex px-10 gap-6 pb-12 min-h-0">
         {/* LEFT - Channel List */}
         <div className="w-[45%] flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto pr-2 space-y-1 tv-scroll">
