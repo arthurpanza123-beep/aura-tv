@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { Navbar } from "@/components/tv/Navbar";
-import { ContentRow } from "@/components/tv/ContentRow";
+import { useState, useEffect, useCallback } from "react";
+import { TVSidebar } from "@/components/tv/TVSidebar";
+import { ContentGrid } from "@/components/tv/ContentGrid";
+import { LoadingScreen } from "@/components/tv/LoadingScreen";
 import { fetchHomeData, type ContentSection } from "@/server/tmdb.functions";
-import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/series")({
   head: () => ({
@@ -27,58 +27,57 @@ const GENRE_FILTERS = [
 function SeriesPage() {
   const [sections, setSections] = useState<ContentSection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showContent, setShowContent] = useState(false);
   const [activeGenre, setActiveGenre] = useState("all");
 
   useEffect(() => {
     fetchHomeData().then((data) => {
       const seriesSections = data.sections.filter(s =>
-        s.id === "popular_series" || s.id === "trending" || s.id === "scifi" || s.id === "crime" || s.id === "drama"
+        s.id === "popular_series" || s.id === "trending" || s.id === "drama" || s.id === "crime"
       );
       setSections(seriesSections.length > 0 ? seriesSections : data.sections.slice(0, 5));
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="tv-shell items-center justify-center" style={{ background: "linear-gradient(160deg, #0a1628, #0d1f3c, #0c1a2e)" }}>
-        <Loader2 className="w-10 h-10 text-[#2a7ab0] animate-spin" />
-      </div>
-    );
+  const handleLoadingFinished = useCallback(() => setShowContent(true), []);
+
+  if (loading || !showContent) {
+    return <LoadingScreen onFinished={handleLoadingFinished} duration={loading ? 1500 : 600} />;
   }
 
-  const filteredSections = activeGenre === "all" ? sections : sections.filter(s => s.id === activeGenre || s.id === "popular_series");
+  const allItems = sections.flatMap(s => s.items);
+  const uniqueItems = allItems.filter((item, i, arr) => arr.findIndex(a => a.id === item.id) === i);
 
   return (
-    <div className="tv-shell" style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #111e35 60%, #0c1a2e 100%)" }}>
-      <Navbar activeTab="series" />
+    <div className="flex h-screen w-screen overflow-hidden" style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #0c1a2e 100%)" }}>
+      <TVSidebar />
 
-      <div className="pt-16 px-10">
-        <h1 className="text-2xl font-bold text-[#e8edf4]">Séries</h1>
-      </div>
+      <main className="flex-1 ml-16 overflow-y-auto overflow-x-hidden">
+        <div className="sticky top-0 z-30 px-8 pt-6 pb-4" style={{ background: "linear-gradient(180deg, #0a1628 70%, transparent)" }}>
+          <h1 className="text-2xl font-bold text-[#e8edf4] mb-4">Séries</h1>
+          <div className="flex gap-2">
+            {GENRE_FILTERS.map(g => (
+              <button
+                key={g.id}
+                onClick={() => setActiveGenre(g.id)}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
+                  activeGenre === g.id
+                    ? "bg-[#2a9af0]/20 text-[#2a9af0] border-[#2a9af0]/40"
+                    : "bg-transparent text-[#6b7f99] border-[#1a2e48] hover:text-white hover:border-[#2a5580]"
+                }`}
+                tabIndex={0}
+              >
+                {g.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      <div className="px-10 py-3 flex gap-2">
-        {GENRE_FILTERS.map(g => (
-          <button
-            key={g.id}
-            onClick={() => setActiveGenre(g.id)}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
-              activeGenre === g.id
-                ? "bg-[#1a5276] text-white border-[#2a7ab0]/50"
-                : "bg-transparent text-[#6b7f99] border-[#1a2e48] hover:text-white hover:border-[#2a5580]"
-            }`}
-            tabIndex={0}
-          >
-            {g.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex-1 min-h-0 flex flex-col justify-start">
-        {filteredSections.slice(0, 3).map((section) => (
-          <ContentRow key={section.id} title={section.title} items={section.items} />
-        ))}
-      </div>
+        <div className="px-4 pb-8">
+          <ContentGrid items={uniqueItems} />
+        </div>
+      </main>
     </div>
   );
 }
