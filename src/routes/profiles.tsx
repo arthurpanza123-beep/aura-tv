@@ -12,16 +12,16 @@ export const Route = createFileRoute("/profiles")({
 });
 
 const PROFILES = [
-  { id: 1, name: "João", color: "oklch(0.6 0.25 255)", initials: "JO", to: "/home" as const },
-  { id: 2, name: "Maria", color: "oklch(0.65 0.2 150)", initials: "MA", to: "/home" as const },
-  { id: 3, name: "Pedro", color: "oklch(0.6 0.22 30)", initials: "PE", to: "/home" as const },
-  { id: 4, name: "Kids", color: "oklch(0.7 0.2 330)", initials: "🧸", to: "/kids" as const },
+  { id: 1, name: "João", color: "oklch(0.6 0.25 255)", initials: "JO", href: "/home" },
+  { id: 2, name: "Maria", color: "oklch(0.65 0.2 150)", initials: "MA", href: "/home" },
+  { id: 3, name: "Pedro", color: "oklch(0.6 0.22 30)", initials: "PE", href: "/home" },
+  { id: 4, name: "Kids", color: "oklch(0.7 0.2 330)", initials: "🧸", href: "/kids" },
 ];
 
 function ProfilesPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background relative overflow-hidden">
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-10 blur-[120px]" style={{ backgroundColor: "var(--tv-glow)" }} />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-10 blur-[120px] pointer-events-none" style={{ backgroundColor: "var(--tv-glow)" }} />
 
       <div className="flex items-center gap-3 mb-12">
         <img src={logoImg} alt="Central Play Plus" className="w-12 h-12 object-contain" />
@@ -34,12 +34,12 @@ function ProfilesPage() {
         Quem está assistindo?
       </h1>
 
-      <div className="flex items-center justify-center gap-6 lg:gap-10 flex-wrap">
+      <div className="flex items-center justify-center gap-6 lg:gap-10 flex-wrap relative z-10">
         {PROFILES.map((profile) => (
           <Link
             key={profile.id}
-            to={profile.to}
-            className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group"
+            to={profile.href as "/home"}
+            className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group no-underline"
             tabIndex={0}
           >
             <div
@@ -54,7 +54,7 @@ function ProfilesPage() {
           </Link>
         ))}
 
-        <button
+        <div
           className="profile-card flex flex-col items-center gap-3 outline-none cursor-pointer group"
           tabIndex={0}
         >
@@ -64,7 +64,7 @@ function ProfilesPage() {
           <span className="text-sm lg:text-base text-muted-foreground group-hover:text-foreground transition-colors">
             Adicionar
           </span>
-        </button>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 export const Route = createFileRoute("/")({
@@ -6,7 +6,6 @@ export const Route = createFileRoute("/")({
 });
 
 function LoginPage() {
-  const navigate = useNavigate();
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("admin123");
   const [error, setError] = useState(false);
@@ -21,7 +20,7 @@ function LoginPage() {
     await new Promise((r) => setTimeout(r, 800));
 
     if (username && password) {
-      navigate({ to: "/profiles" });
+      window.location.href = "/profiles";
     } else {
       setError(true);
       setLoading(false);
