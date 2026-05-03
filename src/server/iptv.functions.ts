@@ -18,11 +18,33 @@ export const iptvLoginFn = createServerFn({ method: "POST" })
     const { iptvLogin } = await import("./iptv.server");
     try {
       const result = await iptvLogin(data.username, data.password);
+
+      // M3U fallback response
+      if ("m3u" in result) {
+        if (!result.valid) {
+          return { success: false, error: "Credenciais inválidas" };
+        }
+        return {
+          success: true,
+          mode: "m3u" as const,
+          user: {
+            status: "Active",
+            expDate: "",
+            isTrial: "0",
+            activeCons: "0",
+            maxConnections: "1",
+            createdAt: "",
+          },
+        };
+      }
+
+      // Xtream response
       if (!result.user_info || result.user_info.status !== "Active") {
         return { success: false, error: "Conta inativa ou credenciais inválidas" };
       }
       return {
         success: true,
+        mode: "xtream" as const,
         user: {
           status: result.user_info.status,
           expDate: result.user_info.exp_date,
@@ -101,6 +123,14 @@ export const getStreamUrlFn = createServerFn({ method: "POST" })
     container: z.string().max(10).optional(),
   }).parse(data))
   .handler(async ({ data }) => {
-    const { buildStreamUrl } = await import("./iptv.server");
-    return { url: buildStreamUrl(data.username, data.password, data.streamId, data.type, data.container || "ts") };
+    const { getStreamUrl } = await import("./iptv.server");
+    const url = await getStreamUrl(data.username, data.password, data.streamId, data.type, data.container || "ts");
+    return { url };
+  });
+
+export const getM3uStatsFn = createServerFn({ method: "POST" })
+  .inputValidator((data) => credSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { getM3uStats } = await import("./iptv.server");
+    return getM3uStats(data.username, data.password);
   });
