@@ -1,6 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import logoImg from "@/assets/logo-central-play.png";
+import { iptvLoginFn } from "@/server/iptv.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -15,18 +17,36 @@ export const Route = createFileRoute("/")({
 function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const loginFn = useServerFn(iptvLoginFn);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!username || !password) {
+      setError("Preencha usuário e senha");
+      return;
+    }
     setLoading(true);
-    setError(false);
-    await new Promise((r) => setTimeout(r, 600));
-    if (username && password) {
-      window.location.href = "/profiles";
-    } else {
-      setError(true);
+    setError("");
+    try {
+      const result = await loginFn({ data: { username, password } });
+      if (result.success) {
+        // Store credentials in sessionStorage (never DNS/URLs)
+        sessionStorage.setItem("iptv_user", username);
+        sessionStorage.setItem("iptv_pass", password);
+        if (result.user) {
+          sessionStorage.setItem("iptv_exp", result.user.expDate || "");
+        }
+        navigate({ to: "/profiles" });
+      } else {
+        setError(result.error || "Credenciais inválidas");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Erro ao conectar. Tente novamente.");
+    } finally {
       setLoading(false);
     }
   };
@@ -73,7 +93,7 @@ function LoginPage() {
         </div>
 
         {error && (
-          <p className="text-[#c0392b] text-sm font-semibold">Usuário ou senha inválidos</p>
+          <p className="text-[#c0392b] text-sm font-semibold">{error}</p>
         )}
 
         <button
