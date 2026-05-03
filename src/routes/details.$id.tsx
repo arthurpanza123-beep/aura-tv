@@ -100,7 +100,7 @@ function DetailsPage() {
                 <Clock className="w-4 h-4" /> {DEMO_DETAIL.duration}
               </span>
               <span className="flex items-center gap-1 text-muted-foreground text-sm">
-                <Film className="w-4 h-4" /> {DEMO_DETAIL.mediaType === "tv" ? "Série" : "Filme"}
+                <Film className="w-4 h-4" /> {(DEMO_DETAIL.mediaType as string) === "tv" ? "Série" : "Filme"}
               </span>
             </div>
 
