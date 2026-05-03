@@ -2,9 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { TVSidebar } from "@/components/tv/TVSidebar";
 import { LoadingScreen } from "@/components/tv/LoadingScreen";
+import { TVPlayer } from "@/components/tv/TVPlayer";
 import { useIptvCredentials } from "@/hooks/useIptvCredentials";
 import { fetchVodCategoriesFn, fetchVodStreamsFn, getStreamUrlFn } from "@/server/iptv.functions";
-import { Search, SlidersHorizontal, Play, Film, AlertTriangle, Tv } from "lucide-react";
+import { Search, SlidersHorizontal, Play, Film, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/movies")({
   head: () => ({
@@ -48,7 +49,9 @@ function MoviesPage() {
   const [sortBy, setSortBy] = useState("name");
   const [error, setError] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [playerMsg, setPlayerMsg] = useState("");
+  const [showPlayer, setShowPlayer] = useState(false);
+  const [playerStreamUrl, setPlayerStreamUrl] = useState("");
+  const [playerTitle, setPlayerTitle] = useState("");
 
   useEffect(() => {
     if (!creds) return;
@@ -104,11 +107,13 @@ function MoviesPage() {
 
   const handleWatch = async (movie: VodItem) => {
     if (!creds) return;
-    setPlayerMsg("Preview indisponível no navegador. O teste completo será feito no APK.");
+    setPlayerTitle(movie.name);
+    setShowPlayer(true);
     try {
-      await getStreamUrlFn({ data: { ...creds, streamId: movie.stream_id, type: "movie", container: movie.container_extension || "mp4" } });
+      const result = await getStreamUrlFn({ data: { ...creds, streamId: movie.stream_id, type: "movie", container: movie.container_extension || "mp4" } });
+      setPlayerStreamUrl(result.url);
     } catch {
-      // Expected
+      setPlayerStreamUrl("");
     }
   };
 
@@ -143,20 +148,20 @@ function MoviesPage() {
     );
   }
 
+  if (showPlayer) {
+    return (
+      <TVPlayer
+        streamUrl={playerStreamUrl}
+        title={playerTitle}
+        subtitle="Filme"
+        onBack={() => { setShowPlayer(false); setPlayerStreamUrl(""); }}
+      />
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden" style={{ background: "linear-gradient(160deg, #0a1628 0%, #0d1f3c 30%, #0c1a2e 100%)" }}>
       <TVSidebar />
-
-      {/* Player message overlay */}
-      {playerMsg && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#0f1e35] border border-[#1a2e48] rounded-2xl p-8 max-w-md text-center">
-            <Tv className="w-12 h-12 text-[#2a9af0] mx-auto mb-4" />
-            <p className="text-[#e8edf4] font-semibold mb-2">{playerMsg}</p>
-            <button onClick={() => setPlayerMsg("")} className="mt-4 px-6 py-2 bg-[#1a5a8a] text-white rounded-lg cursor-pointer text-sm">OK</button>
-          </div>
-        </div>
-      )}
 
       <main className="flex-1 ml-16 overflow-y-auto overflow-x-hidden"
         onScroll={(e) => {

@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { TVSidebar } from "@/components/tv/TVSidebar";
 import { LoadingScreen } from "@/components/tv/LoadingScreen";
+import { TVPlayer } from "@/components/tv/TVPlayer";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Play, X, ChevronUp, Tv, Search, Radio, AlertTriangle } from "lucide-react";
 import { useIptvCredentials } from "@/hooks/useIptvCredentials";
@@ -44,7 +45,9 @@ function ChannelsPage() {
   const [showOverlay, setShowOverlay] = useState(true);
   const [error, setError] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [playerMsg, setPlayerMsg] = useState("");
+  const [playerStreamUrl, setPlayerStreamUrl] = useState("");
+  const [playerTitle, setPlayerTitle] = useState("");
+  const [showPlayer, setShowPlayer] = useState(false);
 
   // Load data
   useEffect(() => {
@@ -116,12 +119,13 @@ function ChannelsPage() {
   // Handle watch
   const handleWatch = async (channel: IptvChannel) => {
     if (!creds) return;
-    setPlayerMsg("Preview indisponível no navegador. O teste completo será feito no APK.");
-    // Still try to get stream URL for future APK use
+    setPlayerTitle(channel.name);
+    setShowPlayer(true);
     try {
-      await getStreamUrlFn({ data: { ...creds, streamId: channel.stream_id, type: "live" } });
+      const result = await getStreamUrlFn({ data: { ...creds, streamId: channel.stream_id, type: "live" } });
+      setPlayerStreamUrl(result.url);
     } catch {
-      // Expected in browser
+      setPlayerStreamUrl("");
     }
   };
 
@@ -160,6 +164,18 @@ function ChannelsPage() {
     );
   }
 
+  // Player overlay
+  if (showPlayer) {
+    return (
+      <TVPlayer
+        streamUrl={playerStreamUrl}
+        title={playerTitle}
+        subtitle="Canal ao Vivo"
+        onBack={() => { setShowPlayer(false); setPlayerStreamUrl(""); }}
+      />
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden" style={{ background: "#000" }}>
       <TVSidebar />
@@ -183,18 +199,6 @@ function ChannelsPage() {
           )}
         </div>
 
-        {/* Player message overlay */}
-        {playerMsg && (
-          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-            <div className="bg-[#0f1e35] border border-[#1a2e48] rounded-2xl p-8 max-w-md text-center">
-              <Tv className="w-12 h-12 text-[#2a9af0] mx-auto mb-4" />
-              <p className="text-[#e8edf4] font-semibold mb-2">{playerMsg}</p>
-              <button onClick={() => setPlayerMsg("")} className="mt-4 px-6 py-2 bg-[#1a5a8a] text-white rounded-lg cursor-pointer text-sm">
-                OK
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Channel info top-left */}
         {selected && (
