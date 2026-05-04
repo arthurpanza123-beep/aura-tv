@@ -32,6 +32,13 @@ function LoginPage() {
     setLoading(true);
     setError("");
     try {
+      // Demo mode — skip server call and go straight to home
+      if (username.trim() === "demo" && password.trim() === "demo") {
+        sessionStorage.clear();
+        sessionStorage.setItem("app_session_token", "demo_session_token");
+        navigate({ to: "/home" });
+        return;
+      }
       const result = await loginFn({
         data: { username: username.trim(), password: password.trim() },
       });
